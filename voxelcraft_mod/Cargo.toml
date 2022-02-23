@@ -1,0 +1,10 @@
+[package]
+name = "voxelcraft_mod"
+version = "0.0.1"
+edition = "2021"
+resolver = "2"
+
+[dependencies]
+async-trait = "0.1.52"
+uuid = { version = "0.8.2", features = ["serde", "v4"] }
+futures = "0.3.21"
