@@ -1,5 +1,3 @@
-
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct EntityOffset {
     pub x: f32,

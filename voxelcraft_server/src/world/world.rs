@@ -1,23 +1,22 @@
-use crate::storage::Storage;
-use std::sync::Arc;
-use crate::chunk::{ChunkMap, CompressedChunk};
-use std::error::Error;
-use std::time::Duration;
-use tokio::time::interval;
-use std::collections::HashMap;
-use uuid::Uuid;
-use tokio::sync::{RwLock, Mutex, broadcast};
 use crate::block::Block;
+use crate::chunk::{ChunkMap, CompressedChunk};
+use crate::dimension::DefaultDimension;
+use crate::entity::Player;
 use crate::event::WorldEvent;
+use crate::storage::Storage;
+use std::collections::HashMap;
+use std::error::Error;
+use std::sync::Arc;
+use std::time::Duration;
+use tokio::sync::mpsc::channel;
 use tokio::sync::mpsc::Receiver;
 use tokio::sync::mpsc::Sender;
-use tokio::sync::mpsc::channel;
-use voxelcraft_mod::{DEFAULT_DIMENSION_ID, Dimension, Entity};
-use crate::dimension::DefaultDimension;
-use voxelcraft_core::chunk::{ChunkPosition, Chunk};
-use crate::entity::Player;
-use voxelcraft_core::entity::{EntityPosition, EntityOffset};
-
+use tokio::sync::{broadcast, Mutex, RwLock};
+use tokio::time::interval;
+use uuid::Uuid;
+use voxelcraft_core::chunk::{Chunk, ChunkPosition};
+use voxelcraft_core::entity::{EntityOffset, EntityPosition};
+use voxelcraft_mod::{Dimension, Entity, DEFAULT_DIMENSION_ID};
 
 #[derive(Debug)]
 pub struct World {
@@ -37,7 +36,7 @@ const CHANNEL_SIZE: usize = 10_000;
 impl World {
     pub fn new<S: Storage + 'static>(storage: S) -> Self {
         let dimensions = Self::construct_dimensions();
-        let chunk_map =  ChunkMap::new(&dimensions);
+        let chunk_map = ChunkMap::new(&dimensions);
         let block_list = Arc::new(HashMap::new());
 
         let (incoming_events_sender, incoming_events_receiver) = channel(CHANNEL_SIZE);
@@ -60,7 +59,10 @@ impl World {
 
     fn construct_dimensions() -> Arc<RwLock<HashMap<Uuid, Arc<dyn Dimension>>>> {
         let mut dimensions = HashMap::new();
-        dimensions.insert(DEFAULT_DIMENSION_ID, Arc::new(DefaultDimension::new()) as Arc<dyn Dimension>);
+        dimensions.insert(
+            DEFAULT_DIMENSION_ID,
+            Arc::new(DefaultDimension::new()) as Arc<dyn Dimension>,
+        );
         Arc::new(RwLock::new(dimensions))
     }
 
@@ -74,7 +76,6 @@ impl World {
             }
             log::debug!("Processed {} events", events_processed);
         }
-
 
         log::debug!("Collecting chunks to update");
         let chunks_to_update = self.get_chunks_that_should_update();
@@ -92,11 +93,9 @@ impl World {
             x: 0,
             y: 0,
             z: 0,
-            dimension: DEFAULT_DIMENSION_ID
+            dimension: DEFAULT_DIMENSION_ID,
         };
-        vec![
-            chunk_position
-        ]
+        vec![chunk_position]
     }
 
     pub fn start_update_loop(self: &Arc<Self>) {
@@ -114,7 +113,10 @@ impl World {
         self.outgoing_events_sender.subscribe()
     }
 
-    pub async fn get_chunk(&self, chunk_position: ChunkPosition) -> Result<Arc<Chunk>, Box<dyn Error + Send + Sync>> {
+    pub async fn get_chunk(
+        &self,
+        chunk_position: ChunkPosition,
+    ) -> Result<Arc<Chunk>, Box<dyn Error + Send + Sync>> {
         self.chunk_map.get(&chunk_position).await
     }
 
@@ -130,18 +132,24 @@ impl World {
     pub async fn load_player(&self, player_id: Uuid) {
         log::info!("Welcoming player {} to the world", player_id);
         let mut players = self.players.lock().await;
-        players.insert(player_id, Player::new(player_id, EntityPosition {
-            chunk_position: ChunkPosition {
-                x: 0,
-                y: 0,
-                z: 0,
-                dimension: DEFAULT_DIMENSION_ID
-            },
-            offset: EntityOffset {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0
-            }
-        }));
+        players.insert(
+            player_id,
+            Player::new(
+                player_id,
+                EntityPosition {
+                    chunk_position: ChunkPosition {
+                        x: 0,
+                        y: 0,
+                        z: 0,
+                        dimension: DEFAULT_DIMENSION_ID,
+                    },
+                    offset: EntityOffset {
+                        x: 0.0,
+                        y: 0.0,
+                        z: 0.0,
+                    },
+                },
+            ),
+        );
     }
 }

@@ -1,11 +1,10 @@
-use crate::chunk::CHUNK_SIZE;
 use crate::block::BlockOffset;
-
+use crate::chunk::CHUNK_SIZE;
 
 #[derive(Debug, Clone, bincode::Encode, bincode::Decode)]
 pub enum BlockMap {
     AllSingleBlock(u32),
-    Map(Box<[u32; CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE]>)
+    Map(Box<[u32; CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE]>),
 }
 
 impl BlockMap {
@@ -15,30 +14,24 @@ impl BlockMap {
 
     pub fn get(&self, offset: BlockOffset) -> u32 {
         match &self {
-            BlockMap::AllSingleBlock(block) => {
-                *block
-            }
-            BlockMap::Map(map) => {
-                map[Self::array_index(offset)]
-            }
+            BlockMap::AllSingleBlock(block) => *block,
+            BlockMap::Map(map) => map[Self::array_index(offset)],
         }
     }
 
     pub fn get_by_index(&self, index: usize) -> u32 {
         assert!(index < CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE);
         match &self {
-            BlockMap::AllSingleBlock(block) => {
-                *block
-            }
-            BlockMap::Map(map) => {
-                map[index]
-            }
+            BlockMap::AllSingleBlock(block) => *block,
+            BlockMap::Map(map) => map[index],
         }
     }
 
     #[inline]
     const fn array_index(offset: BlockOffset) -> usize {
-        let index = (offset.z as usize * CHUNK_SIZE * CHUNK_SIZE) + (offset.y as usize * CHUNK_SIZE) + offset.x as usize;
+        let index = (offset.z as usize * CHUNK_SIZE * CHUNK_SIZE)
+            + (offset.y as usize * CHUNK_SIZE)
+            + offset.x as usize;
         assert!(index < CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE);
         index
     }
@@ -47,12 +40,12 @@ impl BlockMap {
 #[cfg(test)]
 mod tests {
     use crate::block::block_map::BlockMap;
-    use std::mem;
-    use bincode::config;
     use crate::chunk::CHUNK_SIZE;
+    use bincode::config;
     use flate2::write::GzEncoder;
     use flate2::Compression;
     use std::io::Write;
+    use std::mem;
 
     #[test]
     fn it_should_be_small_ram_mem_size_when_all_blocks_are_the_same() {

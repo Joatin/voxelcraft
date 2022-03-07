@@ -1,17 +1,16 @@
-use iced::{Application, Command, Element, Container, Text, alignment, Length, Button};
-use iced::button::State;
-use iced_native::Widget;
+use crate::interface::message::Message;
+use crate::interface::message::Message::Navigate;
 use crate::interface::page::Page;
 use crate::interface::pages::{MainPage, GAME_LOADING_PAGE_ROUTE};
-use crate::interface::message::Message;
-use std::collections::HashMap;
 use crate::interface::router_flags::RouterFlags;
-use crate::interface::message::Message::Navigate;
-
+use iced::button::State;
+use iced::{alignment, Application, Button, Command, Container, Element, Length, Text};
+use iced_native::Widget;
+use std::collections::HashMap;
 
 pub struct Router {
     pages: HashMap<String, Box<dyn Page>>,
-    current_route: String
+    current_route: String,
 }
 
 impl Router {
@@ -33,7 +32,7 @@ impl Application for Router {
         (
             Self {
                 pages: flags.pages,
-                current_route: flags.initial_route
+                current_route: flags.initial_route,
             },
             Command::none(),
         )
@@ -44,24 +43,25 @@ impl Application for Router {
     }
 
     fn update(&mut self, message: Self::Message) -> Command<Self::Message> {
-
         match &message {
-            Message::Navigate{ page } => {
+            Message::Navigate { page } => {
                 self.current_route = page.to_string();
-            },
-            Message::CreateNewGame => {
-                self.current_route = GAME_LOADING_PAGE_ROUTE.to_string()
             }
+            Message::CreateNewGame => self.current_route = GAME_LOADING_PAGE_ROUTE.to_string(),
             _ => {}
         }
 
-        let new_messages = self.pages.iter_mut().map(|(_, page)| {
-            page.update(&message)
-        }).flatten().collect::<Vec<_>>();
+        let new_messages = self
+            .pages
+            .iter_mut()
+            .map(|(_, page)| page.update(&message))
+            .flatten()
+            .collect::<Vec<_>>();
 
-        let commands = new_messages.into_iter().map(|message| {
-            self.update(message)
-        }).collect::<Vec<_>>();
+        let commands = new_messages
+            .into_iter()
+            .map(|message| self.update(message))
+            .collect::<Vec<_>>();
 
         Command::batch(commands)
     }
@@ -73,6 +73,4 @@ impl Application for Router {
             panic!()
         }
     }
-
-
 }

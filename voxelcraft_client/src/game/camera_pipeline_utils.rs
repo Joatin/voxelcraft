@@ -1,19 +1,19 @@
-use wgpu::{BindGroupLayout, BindGroup, Buffer, Device, BufferDescriptor, MapMode, CommandEncoder};
-use std::mem;
 use crate::gpu::camera::Camera;
-use crate::gpu::camera::Projection;
 use crate::gpu::camera::CameraUniform;
-use wgpu::util::StagingBelt;
-use std::num::NonZeroU64;
-use tokio::sync::Mutex;
-use std::sync::Arc;
+use crate::gpu::camera::Projection;
 use std::fmt::{Debug, Formatter};
+use std::mem;
+use std::num::NonZeroU64;
+use std::sync::Arc;
+use tokio::sync::Mutex;
+use wgpu::util::StagingBelt;
+use wgpu::{BindGroup, BindGroupLayout, Buffer, BufferDescriptor, CommandEncoder, Device, MapMode};
 
 pub struct CameraPipelineUtils {
     bind_group_layout: BindGroupLayout,
     bind_group: BindGroup,
     camera_buffer: Buffer,
-    staging_belt: Arc<Mutex<StagingBelt>>
+    staging_belt: Arc<Mutex<StagingBelt>>,
 }
 
 impl Debug for CameraPipelineUtils {
@@ -24,41 +24,33 @@ impl Debug for CameraPipelineUtils {
 
 impl CameraPipelineUtils {
     pub fn new(device: &Device) -> Self {
-
-
-        let camera_buffer = device.create_buffer(
-            &BufferDescriptor {
-                label: Some("Camera Buffer"),
-                usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
-                size: mem::size_of::<CameraUniform>() as u64,
-                mapped_at_creation: false
-            }
-        );
+        let camera_buffer = device.create_buffer(&BufferDescriptor {
+            label: Some("Camera Buffer"),
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+            size: mem::size_of::<CameraUniform>() as u64,
+            mapped_at_creation: false,
+        });
 
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::VERTEX,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: None,
-                    },
-                    count: None,
-                }
-            ],
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::VERTEX,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            }],
             label: Some("camera_bind_group_layout"),
         });
 
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: &bind_group_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: camera_buffer.as_entire_binding(),
-                }
-            ],
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: camera_buffer.as_entire_binding(),
+            }],
             label: Some("camera_bind_group"),
         });
 
@@ -66,7 +58,7 @@ impl CameraPipelineUtils {
             bind_group_layout,
             bind_group,
             camera_buffer,
-            staging_belt: Arc::new(Mutex::new(StagingBelt::new(1024)))
+            staging_belt: Arc::new(Mutex::new(StagingBelt::new(1024))),
         }
     }
 
@@ -78,7 +70,13 @@ impl CameraPipelineUtils {
         &self.bind_group_layout
     }
 
-    pub async fn update(&self, device: &Device, encoder: &mut CommandEncoder, camera: &Camera, projection: &Projection) {
+    pub async fn update(
+        &self,
+        device: &Device,
+        encoder: &mut CommandEncoder,
+        camera: &Camera,
+        projection: &Projection,
+    ) {
         let mut lock = self.staging_belt.lock().await;
         {
             let mut slice = lock.write_buffer(
@@ -86,12 +84,13 @@ impl CameraPipelineUtils {
                 &self.camera_buffer,
                 0,
                 NonZeroU64::new(mem::size_of::<CameraUniform>() as u64).unwrap(),
-                device
+                device,
             );
 
-            slice.copy_from_slice(bytemuck::cast_slice(&[CameraUniform::new(camera, projection)]));
+            slice.copy_from_slice(bytemuck::cast_slice(&[CameraUniform::new(
+                camera, projection,
+            )]));
         }
-
 
         lock.finish()
     }

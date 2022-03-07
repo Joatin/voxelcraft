@@ -1,9 +1,8 @@
-
 #[derive(Default, Debug, Clone, Eq, PartialEq, Hash)]
 pub struct BlockOffset<const SIZE: usize> {
     pub x: usize,
     pub y: usize,
-    pub z: usize
+    pub z: usize,
 }
 
 impl<const SIZE: usize> BlockOffset<SIZE> {
@@ -88,7 +87,7 @@ impl<const SIZE: usize> From<(usize, usize, usize)> for BlockOffset<SIZE> {
         Self {
             x: pos.0,
             y: pos.1,
-            z: pos.2
+            z: pos.2,
         }
     }
 }
@@ -102,7 +101,7 @@ impl<const SIZE: usize> From<&(usize, usize, usize)> for BlockOffset<SIZE> {
         Self {
             x: pos.0,
             y: pos.1,
-            z: pos.2
+            z: pos.2,
         }
     }
 }

@@ -1,6 +1,6 @@
+use crate::gpu::Gpu;
 use image::GenericImageView;
 use std::error::Error;
-use crate::gpu::Gpu;
 
 pub struct Texture {
     pub texture: wgpu::Texture,
@@ -9,11 +9,7 @@ pub struct Texture {
 }
 
 impl Texture {
-    pub fn from_bytes(
-        state: &Gpu,
-        bytes: &[u8],
-        label: &str
-    ) -> Result<Self, Box<dyn Error>> {
+    pub fn from_bytes(state: &Gpu, bytes: &[u8], label: &str) -> Result<Self, Box<dyn Error>> {
         let img = image::load_from_memory(bytes)?;
         Self::from_image(state, &img, Some(label))
     }
@@ -21,7 +17,7 @@ impl Texture {
     pub fn from_image(
         state: &Gpu,
         img: &image::DynamicImage,
-        label: Option<&str>
+        label: Option<&str>,
     ) -> Result<Self, Box<dyn Error>> {
         let rgba = img.as_rgba8().unwrap();
         let dimensions = img.dimensions();
@@ -31,17 +27,15 @@ impl Texture {
             height: dimensions.1,
             depth_or_array_layers: 1,
         };
-        let texture = state.device.create_texture(
-            &wgpu::TextureDescriptor {
-                label,
-                size,
-                mip_level_count: 1,
-                sample_count: 1,
-                dimension: wgpu::TextureDimension::D2,
-                format: wgpu::TextureFormat::Rgba8UnormSrgb,
-                usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
-            }
-        );
+        let texture = state.device.create_texture(&wgpu::TextureDescriptor {
+            label,
+            size,
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Rgba8UnormSrgb,
+            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+        });
 
         state.queue.write_texture(
             wgpu::ImageCopyTexture {
@@ -60,18 +54,20 @@ impl Texture {
         );
 
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
-        let sampler = state.device.create_sampler(
-            &wgpu::SamplerDescriptor {
-                address_mode_u: wgpu::AddressMode::ClampToEdge,
-                address_mode_v: wgpu::AddressMode::ClampToEdge,
-                address_mode_w: wgpu::AddressMode::ClampToEdge,
-                mag_filter: wgpu::FilterMode::Linear,
-                min_filter: wgpu::FilterMode::Nearest,
-                mipmap_filter: wgpu::FilterMode::Nearest,
-                ..Default::default()
-            }
-        );
+        let sampler = state.device.create_sampler(&wgpu::SamplerDescriptor {
+            address_mode_u: wgpu::AddressMode::ClampToEdge,
+            address_mode_v: wgpu::AddressMode::ClampToEdge,
+            address_mode_w: wgpu::AddressMode::ClampToEdge,
+            mag_filter: wgpu::FilterMode::Linear,
+            min_filter: wgpu::FilterMode::Nearest,
+            mipmap_filter: wgpu::FilterMode::Nearest,
+            ..Default::default()
+        });
 
-        Ok(Self { texture, view, sampler })
+        Ok(Self {
+            texture,
+            view,
+            sampler,
+        })
     }
 }

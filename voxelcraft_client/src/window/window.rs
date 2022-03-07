@@ -1,28 +1,26 @@
-use std::error::Error;
-use winit::event_loop::{EventLoop, ControlFlow};
-use winit::window::{WindowBuilder, CursorIcon};
-use crate::window::EventHandler;
-use winit::event::{Event, WindowEvent, ModifiersState, DeviceEvent};
 use crate::window::convert_window_event::convert_window_event;
+use crate::window::EventHandler;
 use iced::mouse::Interaction;
+use std::error::Error;
 use winit::dpi::{LogicalPosition, PhysicalPosition};
+use winit::event::{DeviceEvent, Event, ModifiersState, WindowEvent};
+use winit::event_loop::{ControlFlow, EventLoop};
+use winit::window::{CursorIcon, WindowBuilder};
 
 pub struct Window {
     internal_window: winit::window::Window,
-    event_loop: EventLoop<()>
+    event_loop: EventLoop<()>,
 }
 
 impl Window {
     pub fn create(title: &str) -> Result<Self, Box<dyn Error>> {
         log::info!("Creating new window with title {}", title);
         let event_loop = EventLoop::new();
-        let window = WindowBuilder::new()
-            .with_title(title)
-            .build(&event_loop)?;
+        let window = WindowBuilder::new().with_title(title).build(&event_loop)?;
 
         Ok(Self {
             internal_window: window,
-            event_loop
+            event_loop,
         })
     }
 
@@ -37,20 +35,36 @@ impl Window {
         let mut modifiers = ModifiersState::default();
 
         tokio::task::block_in_place(move || {
-            self.event_loop.run(move |event, _target, mut control_flow| {
-                *control_flow = ControlFlow::Poll;
-                Self::handle_event(&window, event, control_flow, &mut event_handler, &mut modifiers)
-            });
+            self.event_loop
+                .run(move |event, _target, mut control_flow| {
+                    *control_flow = ControlFlow::Poll;
+                    Self::handle_event(
+                        &window,
+                        event,
+                        control_flow,
+                        &mut event_handler,
+                        &mut modifiers,
+                    )
+                });
         });
     }
 
-    fn handle_event<T: EventHandler>(window: &winit::window::Window, event: Event<()>, mut control_flow: &mut ControlFlow, event_handler: &mut T, modifiers: &mut ModifiersState) {
+    fn handle_event<T: EventHandler>(
+        window: &winit::window::Window,
+        event: Event<()>,
+        mut control_flow: &mut ControlFlow,
+        event_handler: &mut T,
+        modifiers: &mut ModifiersState,
+    ) {
         match event {
             Event::NewEvents(_) => {}
             Event::WindowEvent { window_id, event } if window_id == window.id() => {
                 Self::handle_window_event(window, event, control_flow, event_handler, modifiers)
             }
-            Event::DeviceEvent { event: DeviceEvent::MouseMotion { delta }, .. } => {
+            Event::DeviceEvent {
+                event: DeviceEvent::MouseMotion { delta },
+                ..
+            } => {
                 if event_handler.should_cursor_grab() {
                     event_handler.on_mouse_moved(delta.0, delta.1)
                 }
@@ -59,7 +73,9 @@ impl Window {
             Event::Suspended => {}
             Event::Resumed => {}
             Event::MainEventsCleared => {
-                window.set_cursor_grab(event_handler.should_cursor_grab()).unwrap();
+                window
+                    .set_cursor_grab(event_handler.should_cursor_grab())
+                    .unwrap();
                 window.set_cursor_visible(!event_handler.should_cursor_grab());
                 window.request_redraw();
             }
@@ -71,44 +87,30 @@ impl Window {
                 }
 
                 let win_cursor = match cursor {
-                    Interaction::Idle => {
-                        CursorIcon::Default
-                    }
-                    Interaction::Pointer => {
-                        CursorIcon::Default
-                    }
-                    Interaction::Grab => {
-                        CursorIcon::Grab
-                    }
-                    Interaction::Text => {
-                        CursorIcon::Text
-                    }
-                    Interaction::Crosshair => {
-                        CursorIcon::Crosshair
-                    }
-                    Interaction::Working => {
-                        CursorIcon::Wait
-                    }
-                    Interaction::Grabbing => {
-                        CursorIcon::Grabbing
-                    }
-                    Interaction::ResizingHorizontally => {
-                        CursorIcon::RowResize
-                    }
-                    Interaction::ResizingVertically => {
-                        CursorIcon::RowResize
-                    }
+                    Interaction::Idle => CursorIcon::Default,
+                    Interaction::Pointer => CursorIcon::Default,
+                    Interaction::Grab => CursorIcon::Grab,
+                    Interaction::Text => CursorIcon::Text,
+                    Interaction::Crosshair => CursorIcon::Crosshair,
+                    Interaction::Working => CursorIcon::Wait,
+                    Interaction::Grabbing => CursorIcon::Grabbing,
+                    Interaction::ResizingHorizontally => CursorIcon::RowResize,
+                    Interaction::ResizingVertically => CursorIcon::RowResize,
                 };
 
-                window.set_cursor_icon(
-                    win_cursor
-                )
+                window.set_cursor_icon(win_cursor)
             }
             _ => {}
         }
     }
 
-    fn handle_window_event<T: EventHandler>(window: &winit::window::Window, event: WindowEvent, mut control_flow: &mut ControlFlow, event_handler: &mut T, modifiers: &mut ModifiersState) {
+    fn handle_window_event<T: EventHandler>(
+        window: &winit::window::Window,
+        event: WindowEvent,
+        mut control_flow: &mut ControlFlow,
+        event_handler: &mut T,
+        modifiers: &mut ModifiersState,
+    ) {
         match &event {
             WindowEvent::Resized(physical_size) => {
                 let scale_factor = window.scale_factor();
@@ -142,7 +144,7 @@ impl Window {
                 if event_handler.should_cursor_grab() {
                     window.set_cursor_position(PhysicalPosition {
                         x: window.inner_size().width / 2,
-                        y: window.inner_size().height / 2
+                        y: window.inner_size().height / 2,
                     });
                 };
             }
@@ -153,17 +155,14 @@ impl Window {
             WindowEvent::TouchpadPressure { .. } => {}
             WindowEvent::AxisMotion { .. } => {}
             WindowEvent::Touch(_) => {}
-            WindowEvent::ScaleFactorChanged { new_inner_size, scale_factor } => {
-                event_handler.on_resize((**new_inner_size).into(), *scale_factor)
-            }
+            WindowEvent::ScaleFactorChanged {
+                new_inner_size,
+                scale_factor,
+            } => event_handler.on_resize((**new_inner_size).into(), *scale_factor),
             WindowEvent::ThemeChanged(_) => {}
         }
 
-        if let Some(e) = convert_window_event(
-            &event,
-            window.scale_factor(),
-            *modifiers,
-        ) {
+        if let Some(e) = convert_window_event(&event, window.scale_factor(), *modifiers) {
             event_handler.on_window_event(e);
         }
     }

@@ -1,9 +1,9 @@
 use crate::event::WorldEvent;
-use tokio::sync::broadcast;
-use voxelcraft_core::entity::EntityPosition;
-use voxelcraft_core::chunk::{ChunkPosition, Chunk};
-use std::sync::Arc;
 use std::error::Error;
+use std::sync::Arc;
+use tokio::sync::broadcast;
+use voxelcraft_core::chunk::{Chunk, ChunkPosition};
+use voxelcraft_core::entity::EntityPosition;
 
 #[async_trait::async_trait]
 pub trait Client {
@@ -17,5 +17,8 @@ pub trait Client {
     /// You position
     async fn position(&self) -> EntityPosition;
 
-    async fn get_chunk(&self, chunk_position: ChunkPosition) -> Result<Arc<Chunk>, Box<dyn Error + Send + Sync>>;
+    async fn get_chunk(
+        &self,
+        chunk_position: ChunkPosition,
+    ) -> Result<Arc<Chunk>, Box<dyn Error + Send + Sync>>;
 }

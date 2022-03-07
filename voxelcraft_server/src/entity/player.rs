@@ -1,19 +1,16 @@
-use voxelcraft_mod::{LivingEntity, Entity};
 use uuid::Uuid;
 use voxelcraft_core::entity::EntityPosition;
+use voxelcraft_mod::{Entity, LivingEntity};
 
 #[derive(Debug)]
 pub struct Player {
     id: Uuid,
-    position: EntityPosition
+    position: EntityPosition,
 }
 
 impl Player {
     pub fn new(id: Uuid, position: EntityPosition) -> Self {
-        Self {
-            id,
-            position
-        }
+        Self { id, position }
     }
 }
 
@@ -27,7 +24,4 @@ impl Entity for Player {
     }
 }
 
-impl LivingEntity for Player {
-
-}
-
+impl LivingEntity for Player {}

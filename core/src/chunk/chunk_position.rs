@@ -1,6 +1,6 @@
-use uuid::Uuid;
 use std::fmt;
 use std::fmt::{Display, Formatter};
+use uuid::Uuid;
 
 #[derive(Default, Debug, Copy, Clone, bincode::Encode, bincode::Decode, Hash, Eq, PartialEq)]
 pub struct ChunkPosition {
@@ -13,12 +13,15 @@ pub struct ChunkPosition {
 
 impl Display for ChunkPosition {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "x: {}, y: {}, z: {}, dimension: {}", self.x, self.y, self.z, self.dimension)
+        write!(
+            f,
+            "x: {}, y: {}, z: {}, dimension: {}",
+            self.x, self.y, self.z, self.dimension
+        )
     }
 }
 
 impl ChunkPosition {
-
     pub fn surrounding_chunks(&self, range: usize) -> Vec<ChunkPosition> {
         let range = range as i32;
         let start_x = self.x - range;
@@ -28,7 +31,8 @@ impl ChunkPosition {
         let start_z = self.z - range;
         let end_z = self.z + range + 1;
 
-        let mut positions = Vec::with_capacity(((range * 2 + 1) * (range * 2 + 1) * (range * 2 + 1)) as usize);
+        let mut positions =
+            Vec::with_capacity(((range * 2 + 1) * (range * 2 + 1) * (range * 2 + 1)) as usize);
 
         for x in start_x..end_x {
             for y in start_y..end_y {
@@ -37,12 +41,11 @@ impl ChunkPosition {
                         x,
                         y,
                         z,
-                        dimension: self.dimension
+                        dimension: self.dimension,
                     })
                 }
             }
         }
-
 
         positions
     }
@@ -61,7 +64,6 @@ mod tests {
         let positions = position.surrounding_chunks(16);
         assert_eq!(35_937, positions.len())
     }
-
 
     #[test]
     fn surrounding_chunks_should_contain_the_right_chunks() {

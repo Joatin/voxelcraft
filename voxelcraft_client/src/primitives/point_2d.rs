@@ -1,9 +1,9 @@
-use winit::dpi::{PhysicalPosition, LogicalPosition};
+use winit::dpi::{LogicalPosition, PhysicalPosition};
 
 #[derive(Debug, Default, Copy, Clone, PartialEq)]
 pub struct Point2D {
     x: f32,
-    y: f32
+    y: f32,
 }
 
 impl From<Point2D> for iced_native::Point {

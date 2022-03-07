@@ -1,4 +1,3 @@
-
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct TexturedVertex {
@@ -23,7 +22,7 @@ impl TexturedVertex {
                     shader_location: 1,
                     format: wgpu::VertexFormat::Float32x2,
                 },
-            ]
+            ],
         }
     }
 }

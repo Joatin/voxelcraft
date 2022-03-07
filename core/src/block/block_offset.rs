@@ -8,7 +8,6 @@ pub struct BlockOffset {
 }
 
 impl BlockOffset {
-    
     pub fn from_index(index: usize) -> Self {
         assert!(index < CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE);
 
@@ -17,13 +16,9 @@ impl BlockOffset {
         let y = index / CHUNK_SIZE;
         let x = index % CHUNK_SIZE;
 
-        BlockOffset {
-            x,
-            y,
-            z
-        }
+        BlockOffset { x, y, z }
     }
-    
+
     pub fn north(&self) -> Option<BlockOffset> {
         if self.z > 0 {
             Some(BlockOffset {

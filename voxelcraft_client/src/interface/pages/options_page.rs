@@ -1,12 +1,10 @@
-use crate::interface::page::Page;
-use iced::{Element, Column, Length, Text};
 use crate::interface::message::Message;
+use crate::interface::page::Page;
+use iced::{Column, Element, Length, Text};
 
 pub const OPTIONS_PAGE_ROUTE: &str = "OPTIONS";
 
-pub struct OptionsPage {
-
-}
+pub struct OptionsPage {}
 
 impl OptionsPage {
     pub fn new() -> Self {

@@ -1,10 +1,8 @@
-use voxelcraft_core::chunk::{ChunkPosition, Chunk};
+use voxelcraft_core::chunk::{Chunk, ChunkPosition};
 use voxelcraft_mod::world_generator::WorldGenerator;
 
 #[derive(Debug)]
-pub struct DefaultWorldGenerator {
-
-}
+pub struct DefaultWorldGenerator {}
 
 impl DefaultWorldGenerator {
     pub fn new() -> Self {

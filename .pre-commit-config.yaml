@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: rustfmt
+        name: rustfmt
+        entry: bash -c 'lines=$(pylint api/ | wc -l) && (( lines > 10)) && exit 1'
+        language: system
+        types: [ rust ]
+        pass_filenames: false

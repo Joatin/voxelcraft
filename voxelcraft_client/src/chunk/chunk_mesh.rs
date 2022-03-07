@@ -1,12 +1,11 @@
-use wgpu::{Buffer, Device, BufferDescriptor, BufferUsages, RenderPass, IndexFormat};
-use voxelcraft_core::chunk::{Chunk, CHUNK_SIZE};
-use crate::gpu::RenderContext;
-use voxelcraft_core::block::BlockOffset;
 use crate::gpu::primitives::TexturedArrayVertex;
+use crate::gpu::RenderContext;
+use smallvec::SmallVec;
 use std::mem;
 use std::time::Instant;
-use smallvec::SmallVec;
-
+use voxelcraft_core::block::BlockOffset;
+use voxelcraft_core::chunk::{Chunk, CHUNK_SIZE};
+use wgpu::{Buffer, BufferDescriptor, BufferUsages, Device, IndexFormat, RenderPass};
 
 #[derive(Debug)]
 pub struct ChunkMesh {
@@ -22,18 +21,25 @@ impl ChunkMesh {
         let start_time = Instant::now();
         let mesh = Self::build_mesh(chunk);
         let indices = Self::get_indexes(&mesh);
-        log::info!("Collected {} faces in {:?} for chunk at: {}", mesh.len(), Instant::now().duration_since(start_time), chunk.position());
+        log::info!(
+            "Collected {} faces in {:?} for chunk at: {}",
+            mesh.len(),
+            Instant::now().duration_since(start_time),
+            chunk.position()
+        );
 
         let vertex_buffer = {
             let buffer = device.create_buffer(&BufferDescriptor {
                 label: Some(&format!("Chunk vertex buffer at: {}", chunk.position())),
                 size: (mem::size_of::<TexturedArrayVertex>() * mesh.len()) as u64,
                 usage: BufferUsages::VERTEX,
-                mapped_at_creation: true
+                mapped_at_creation: true,
             });
 
             let slice = buffer.slice(..);
-            slice.get_mapped_range_mut().copy_from_slice(bytemuck::cast_slice(&mesh));
+            slice
+                .get_mapped_range_mut()
+                .copy_from_slice(bytemuck::cast_slice(&mesh));
 
             buffer.unmap();
 
@@ -45,14 +51,15 @@ impl ChunkMesh {
                 label: Some(&format!("Chunk index buffer at: {}", chunk.position())),
                 size: (mem::size_of::<u32>() * (mesh.len() / 4) * 6) as u64,
                 usage: BufferUsages::INDEX,
-                mapped_at_creation: true
+                mapped_at_creation: true,
             });
 
             let slice = buffer.slice(..);
-            slice.get_mapped_range_mut().copy_from_slice(bytemuck::cast_slice(&indices));
+            slice
+                .get_mapped_range_mut()
+                .copy_from_slice(bytemuck::cast_slice(&indices));
 
             buffer.unmap();
-
 
             buffer
         };
@@ -64,14 +71,14 @@ impl ChunkMesh {
             vertex_buffer,
             vertex_count,
             index_buffer,
-            index_count
+            index_count,
         }
     }
 
     fn get_indexes(vertices: &Vec<TexturedArrayVertex>) -> Vec<u32> {
         let mut indices = Vec::with_capacity(vertices.len());
         for n in 0..(vertices.len() / 4) {
-            let offset = n*4;
+            let offset = n * 4;
             indices.push((0 + offset) as u32);
             indices.push((1 + offset) as u32);
             indices.push((2 + offset) as u32);
@@ -152,8 +159,6 @@ impl ChunkMesh {
         faces
     }
 
-
-
     fn north_faces(offset: BlockOffset) -> [TexturedArrayVertex; 4] {
         let x = offset.x as f32;
         let y = offset.y as f32;
@@ -163,22 +168,22 @@ impl ChunkMesh {
             TexturedArrayVertex {
                 position: [x, y, z],
                 tex_coords: [0.0, 0.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x + 1.0, y, z],
                 tex_coords: [1.0, 0.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x, y + 1.0, z],
                 tex_coords: [0.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x + 1.0, y + 1.0, z],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
         ]
     }
@@ -192,22 +197,22 @@ impl ChunkMesh {
             TexturedArrayVertex {
                 position: [x, y, z + 1.0],
                 tex_coords: [0.0, 0.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x + 1.0, y, z + 1.0],
                 tex_coords: [1.0, 0.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x, y + 1.0, z + 1.0],
                 tex_coords: [0.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x + 1.0, y + 1.0, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
         ]
     }
@@ -222,22 +227,22 @@ impl ChunkMesh {
             TexturedArrayVertex {
                 position: [x, y, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x + 1.0, y, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x, y + 1.0, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x + 1.0, y + 1.0, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
         ]
     }
@@ -252,22 +257,22 @@ impl ChunkMesh {
             TexturedArrayVertex {
                 position: [x, y, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x + 1.0, y, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x, y + 1.0, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x + 1.0, y + 1.0, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
         ]
     }
@@ -282,22 +287,22 @@ impl ChunkMesh {
             TexturedArrayVertex {
                 position: [x, y, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x + 1.0, y, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x, y + 1.0, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x + 1.0, y + 1.0, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
         ]
     }
@@ -312,27 +317,31 @@ impl ChunkMesh {
             TexturedArrayVertex {
                 position: [x, y, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x + 1.0, y, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x, y + 1.0, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
             TexturedArrayVertex {
                 position: [x + 1.0, y + 1.0, z + 1.0],
                 tex_coords: [1.0, 1.0],
-                tex_index: 0
+                tex_index: 0,
             },
         ]
     }
 
-    pub fn render<'a>(&'a mut self, render_context: &RenderContext, render_pass: &mut RenderPass<'a>) {
+    pub fn render<'a>(
+        &'a mut self,
+        render_context: &RenderContext,
+        render_pass: &mut RenderPass<'a>,
+    ) {
         render_pass.set_index_buffer(self.index_buffer.slice(..), IndexFormat::Uint32);
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
         render_pass.draw_indexed(0..self.index_count, 0, 0..1);

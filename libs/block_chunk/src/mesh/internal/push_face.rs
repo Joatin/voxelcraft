@@ -1,6 +1,11 @@
-use crate::mesh::{Face, BlockDescriptor};
+use crate::mesh::{BlockDescriptor, Face};
 
-pub fn push_face<const SIZE: usize>(mesh: &mut Vec<Face<SIZE>>, transparent_mesh: &mut Vec<Face<SIZE>>, descriptor: &BlockDescriptor, face: Face<SIZE>) {
+pub fn push_face<const SIZE: usize>(
+    mesh: &mut Vec<Face<SIZE>>,
+    transparent_mesh: &mut Vec<Face<SIZE>>,
+    descriptor: &BlockDescriptor,
+    face: Face<SIZE>,
+) {
     if descriptor.is_transparent {
         transparent_mesh.push(face)
     } else {
@@ -20,10 +25,15 @@ mod tests {
         let mut transparent_mesh = vec![];
         let descriptor = BlockDescriptor {
             is_standard_square: true,
-            is_transparent: true
+            is_transparent: true,
         };
 
-        push_face(&mut mesh, &mut transparent_mesh, &descriptor, Face::north(&BlockOffset::<16>::default()));
+        push_face(
+            &mut mesh,
+            &mut transparent_mesh,
+            &descriptor,
+            Face::north(&BlockOffset::<16>::default()),
+        );
 
         assert_eq!(mesh.len(), 0);
         assert_eq!(transparent_mesh.len(), 1);
@@ -35,10 +45,15 @@ mod tests {
         let mut transparent_mesh = vec![];
         let descriptor = BlockDescriptor {
             is_standard_square: true,
-            is_transparent: false
+            is_transparent: false,
         };
 
-        push_face(&mut mesh, &mut transparent_mesh, &descriptor, Face::north(&BlockOffset::<16>::default()));
+        push_face(
+            &mut mesh,
+            &mut transparent_mesh,
+            &descriptor,
+            Face::north(&BlockOffset::<16>::default()),
+        );
 
         assert_eq!(mesh.len(), 1);
         assert_eq!(transparent_mesh.len(), 0);

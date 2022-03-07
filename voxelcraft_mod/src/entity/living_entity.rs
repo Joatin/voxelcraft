@@ -1,5 +1,3 @@
 use crate::Entity;
 
-pub trait LivingEntity: Entity {
-
-}
+pub trait LivingEntity: Entity {}

@@ -1,15 +1,15 @@
+use crate::primitives::{Point2D, Size};
+use iced_native::Clipboard;
 use std::sync::{Arc, Mutex};
 use wgpu::{Device, TextureView};
 use winit::dpi::PhysicalSize;
-use crate::primitives::{Point2D, Size};
-use iced_native::Clipboard;
 
 #[derive(Clone)]
 pub struct RenderContext {
     pub device: Arc<Device>,
     pub view: Arc<TextureView>,
     pub size: Size,
-    pub cursor_position: Point2D
+    pub cursor_position: Point2D,
 }
 
 impl RenderContext {
@@ -18,7 +18,7 @@ impl RenderContext {
             device: Arc::clone(device),
             view: Arc::clone(view),
             size: size.clone().into(),
-            cursor_position: Point2D::default()
+            cursor_position: Point2D::default(),
         }
     }
 }

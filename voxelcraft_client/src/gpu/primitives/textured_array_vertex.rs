@@ -1,10 +1,9 @@
-
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct TexturedArrayVertex {
     pub position: [f32; 3],
     pub tex_coords: [f32; 2],
-    pub tex_index: i32
+    pub tex_index: i32,
 }
 
 impl TexturedArrayVertex {
@@ -25,11 +24,12 @@ impl TexturedArrayVertex {
                     format: wgpu::VertexFormat::Float32x2,
                 },
                 wgpu::VertexAttribute {
-                    offset: (mem::size_of::<[f32; 3]>() + mem::size_of::<[f32; 2]>()) as wgpu::BufferAddress,
+                    offset: (mem::size_of::<[f32; 3]>() + mem::size_of::<[f32; 2]>())
+                        as wgpu::BufferAddress,
                     shader_location: 2,
                     format: wgpu::VertexFormat::Sint32,
                 },
-            ]
+            ],
         }
     }
 }

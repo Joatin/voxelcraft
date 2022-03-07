@@ -1,8 +1,8 @@
-use tokio::sync::RwLock;
+use crate::game::{Game, LocalGame};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::time::Duration;
 use std::sync::Arc;
-use crate::game::{LocalGame, Game};
+use std::time::Duration;
+use tokio::sync::RwLock;
 
 #[derive(Debug)]
 pub struct Context {
@@ -10,7 +10,7 @@ pub struct Context {
     show_debug: AtomicBool,
     current_fps: std::sync::Mutex<f64>,
     time_to_draw_frame: std::sync::Mutex<Duration>,
-    game: Option<Arc<dyn Game>>
+    game: Option<Arc<dyn Game>>,
 }
 
 impl Context {
@@ -20,7 +20,7 @@ impl Context {
             show_debug: AtomicBool::new(false),
             current_fps: std::sync::Mutex::new(0.0),
             time_to_draw_frame: std::sync::Mutex::new(Duration::default()),
-            game: None
+            game: None,
         }
     }
 

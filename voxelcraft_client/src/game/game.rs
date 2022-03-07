@@ -1,11 +1,11 @@
-use std::fmt::Debug;
-use std::sync::Arc;
 use crate::context::Context;
+use crate::game::camera_pipeline_utils::CameraPipelineUtils;
 use crate::gpu::RenderContext;
-use wgpu::CommandBuffer;
 use crate::interface::Message;
 use crate::primitives::Size;
-use crate::game::camera_pipeline_utils::CameraPipelineUtils;
+use std::fmt::Debug;
+use std::sync::Arc;
+use wgpu::CommandBuffer;
 
 pub trait Game: Debug {
     fn update(&mut self);

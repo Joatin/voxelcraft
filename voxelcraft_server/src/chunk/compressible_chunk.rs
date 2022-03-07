@@ -1,6 +1,6 @@
 use crate::chunk::compressed_chunk::CompressedChunk;
-use std::error::Error;
 use bincode::config;
+use std::error::Error;
 use voxelcraft_core::chunk::Chunk;
 
 pub trait CompressibleChunk {

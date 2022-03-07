@@ -1,5 +1,5 @@
-use iced::{Element, Command};
 use crate::interface::message::Message;
+use iced::{Command, Element};
 
 pub trait Page {
     fn name(&self) -> &str;

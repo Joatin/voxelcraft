@@ -11,7 +11,7 @@ impl CameraUniform {
     pub fn new(camera: &Camera, projection: &Projection) -> Self {
         Self {
             view_position: camera.position.to_homogeneous().into(),
-            view_proj: (projection.calc_matrix() * camera.calc_matrix()).into()
+            view_proj: (projection.calc_matrix() * camera.calc_matrix()).into(),
         }
     }
 }

@@ -1,5 +1,3 @@
-
-
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum FaceDirection {
     North,
@@ -7,5 +5,5 @@ pub enum FaceDirection {
     West,
     East,
     Up,
-    Down
+    Down,
 }

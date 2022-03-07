@@ -1,5 +1,2 @@
-
 #[derive(Debug, Clone)]
-pub enum WorldEvent {
-
-}
+pub enum WorldEvent {}

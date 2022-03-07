@@ -1,6 +1,6 @@
 use crate::chunk::ChunkMesh;
-use wgpu::Device;
 use voxelcraft_core::chunk::Chunk;
+use wgpu::Device;
 
 #[async_trait::async_trait]
 pub trait MeshableChunk {

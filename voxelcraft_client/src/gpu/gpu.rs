@@ -1,13 +1,13 @@
-use winit::window::Window;
-use winit::event::WindowEvent;
-use winit::dpi::PhysicalSize;
-use wgpu::{TextureView, TextureFormat, CommandBuffer};
-use futures::Future;
-use std::sync::Arc;
-use pollster::FutureExt;
-use crate::gpu::RenderContext;
-use std::time::Instant;
 use crate::context::Context;
+use crate::gpu::RenderContext;
+use futures::Future;
+use pollster::FutureExt;
+use std::sync::Arc;
+use std::time::Instant;
+use wgpu::{CommandBuffer, TextureFormat, TextureView};
+use winit::dpi::PhysicalSize;
+use winit::event::WindowEvent;
+use winit::window::Window;
 
 pub struct Gpu {
     surface: wgpu::Surface,
@@ -17,7 +17,7 @@ pub struct Gpu {
     pub size: PhysicalSize<u32>,
     render_pipeline: wgpu::RenderPipeline,
     pub render_format: TextureFormat,
-    last_render: Instant
+    last_render: Instant,
 }
 
 impl Gpu {
@@ -31,22 +31,26 @@ impl Gpu {
         let instance = wgpu::Instance::new(wgpu::Backends::all());
         let surface = unsafe { instance.create_surface(window) };
 
-        let adapter = instance.request_adapter(
-            &wgpu::RequestAdapterOptions {
+        let adapter = instance
+            .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::HighPerformance,
                 compatible_surface: Some(&surface),
                 force_fallback_adapter: false,
-            },
-        ).await.unwrap();
+            })
+            .await
+            .unwrap();
 
-        let (device, queue) = adapter.request_device(
-            &wgpu::DeviceDescriptor {
-                features: wgpu::Features::empty(),
-                limits: wgpu::Limits::default(),
-                label: None,
-            },
-            None, // Trace path
-        ).await.unwrap();
+        let (device, queue) = adapter
+            .request_device(
+                &wgpu::DeviceDescriptor {
+                    features: wgpu::Features::empty(),
+                    limits: wgpu::Limits::default(),
+                    label: None,
+                },
+                None, // Trace path
+            )
+            .await
+            .unwrap();
 
         let shader = device.create_shader_module(&wgpu::include_wgsl!("shader.wgsl"));
 
@@ -112,7 +116,7 @@ impl Gpu {
             size,
             render_pipeline,
             render_format,
-            last_render: Instant::now()
+            last_render: Instant::now(),
         }
     }
 
@@ -126,19 +130,28 @@ impl Gpu {
         }
     }
 
-    pub fn start_render_pass<'a, T: FnOnce(RenderContext) -> Vec<CommandBuffer>>(&'a mut self, mut render_callback: T) -> Result<(), wgpu::SurfaceError> {
+    pub fn start_render_pass<'a, T: FnOnce(RenderContext) -> Vec<CommandBuffer>>(
+        &'a mut self,
+        mut render_callback: T,
+    ) -> Result<(), wgpu::SurfaceError> {
         let output = self.surface.get_current_texture()?;
 
         let start_draw_time = Instant::now();
 
-        let view = Arc::new(output.texture.create_view(&wgpu::TextureViewDescriptor::default()));
+        let view = Arc::new(
+            output
+                .texture
+                .create_view(&wgpu::TextureViewDescriptor::default()),
+        );
 
         let render_context = RenderContext::new(&self.device, &view, &self.size);
         let command_buffers = render_callback(render_context);
 
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("Render Encoder"),
-        });
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("Render Encoder"),
+            });
 
         {
             let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -165,7 +178,6 @@ impl Gpu {
         self.queue.submit(vec![encoder.finish()]);
         self.queue.submit(command_buffers);
 
-
         // {
         //     let time_to_render = Instant::now().duration_since(start_draw_time);
         //     self.context.set_time_to_draw_frame(time_to_render);
@@ -180,8 +192,6 @@ impl Gpu {
         //     self.last_render = finish_time;
         // }
 
-
         Ok(())
-
     }
 }

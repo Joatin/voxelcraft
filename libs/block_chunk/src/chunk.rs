@@ -1,31 +1,27 @@
-use std::mem;
+use crate::BlockOffset;
 use bincode::config;
-use std::error::Error;
 use flate2::read::GzDecoder;
-use std::io::Read;
 use flate2::write::GzEncoder;
 use flate2::Compression;
-use crate::BlockOffset;
+use std::error::Error;
+use std::io::Read;
+use std::mem;
 
 #[derive(Clone, Debug, bincode::Encode, bincode::Decode)]
 pub struct Chunk<T: 'static, const SIZE: usize> {
-    blocks: [[[T; SIZE]; SIZE]; SIZE]
+    blocks: [[[T; SIZE]; SIZE]; SIZE],
 }
 
 impl<T: 'static + Default + Copy, const SIZE: usize> Chunk<T, SIZE> {
     pub fn new() -> Self {
         Self {
-            blocks: [[[T::default(); SIZE]; SIZE]; SIZE]
+            blocks: [[[T::default(); SIZE]; SIZE]; SIZE],
         }
     }
 }
 
-
 impl<T: 'static, const SIZE: usize> Chunk<T, SIZE> {
-
-
     pub fn get(&self, position: &BlockOffset<SIZE>) -> &T {
-
         assert!(position.x < SIZE);
         assert!(position.y < SIZE);
         assert!(position.z < SIZE);
@@ -38,13 +34,15 @@ impl<T: 'static, const SIZE: usize> Chunk<T, SIZE> {
         assert!(position.y < SIZE);
         assert!(position.z < SIZE);
 
-        mem::swap( &mut self.blocks[position.z][position.y][position.x], &mut value);
+        mem::swap(
+            &mut self.blocks[position.z][position.y][position.x],
+            &mut value,
+        );
         value
     }
 }
 
 impl<T: 'static + Clone + Copy, const SIZE: usize> Chunk<T, SIZE> {
-
     pub fn new_checker(val_1: T, val_2: T) -> Self {
         let mut blocks = [[[val_1; SIZE]; SIZE]; SIZE];
         for x in 0..SIZE {
@@ -57,13 +55,9 @@ impl<T: 'static + Clone + Copy, const SIZE: usize> Chunk<T, SIZE> {
             }
         }
 
-        Self {
-            blocks
-        }
+        Self { blocks }
     }
 }
-
-
 
 impl<T: 'static + bincode::Encode, const SIZE: usize> Chunk<T, SIZE> {
     pub fn compress(self) -> Result<Vec<u8>, Box<dyn Error>> {

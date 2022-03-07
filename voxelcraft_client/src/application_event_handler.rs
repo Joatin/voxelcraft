@@ -1,17 +1,17 @@
-use crate::window::EventHandler;
-use crate::primitives::{Size, Point2D};
-use crate::gpu::Gpu;
-use iced_wgpu::wgpu::SurfaceError;
-use crate::interface::Interface;
-use iced_native::Event;
-use iced::mouse::Interaction;
 use crate::game::GameManager;
+use crate::gpu::Gpu;
+use crate::interface::Interface;
+use crate::primitives::{Point2D, Size};
+use crate::window::EventHandler;
+use iced::mouse::Interaction;
+use iced_native::Event;
+use iced_wgpu::wgpu::SurfaceError;
 use winit::event::ElementState;
 
 pub struct ApplicationEventHandler {
     gpu: Gpu,
     interface: Interface,
-    game_manager: GameManager
+    game_manager: GameManager,
 }
 
 impl ApplicationEventHandler {
@@ -19,7 +19,7 @@ impl ApplicationEventHandler {
         Self {
             gpu,
             interface,
-            game_manager
+            game_manager,
         }
     }
 }
@@ -29,23 +29,22 @@ impl EventHandler for ApplicationEventHandler {
         let mut continue_render = true;
         let cursor = Interaction::Pointer;
 
-        match self.gpu.start_render_pass(|render_context|{
+        match self.gpu.start_render_pass(|render_context| {
             let mut buffers = self.game_manager.render(&render_context);
             let game_messages = self.game_manager.get_messages();
-            let (buffer, cursor, should_quit) = self.interface.render(&render_context, game_messages, |m| {
-                self.game_manager.process_message(m)
-            });
+            let (buffer, cursor, should_quit) =
+                self.interface.render(&render_context, game_messages, |m| {
+                    self.game_manager.process_message(m)
+                });
             buffers.push(buffer);
             continue_render = !should_quit;
             buffers
         }) {
             Err(wgpu::SurfaceError::Lost) => {
                 self.gpu.resize(self.gpu.size);
-            },
+            }
             // The system is out of memory, we should probably quit
-            Err(wgpu::SurfaceError::OutOfMemory) => {
-                continue_render = false
-            },
+            Err(wgpu::SurfaceError::OutOfMemory) => continue_render = false,
             _ => {}
         }
 
@@ -55,17 +54,11 @@ impl EventHandler for ApplicationEventHandler {
         (continue_render, cursor)
     }
 
-    fn on_close(&mut self) {
+    fn on_close(&mut self) {}
 
-    }
+    fn focus_gained(&mut self) {}
 
-    fn focus_gained(&mut self) {
-
-    }
-
-    fn focus_lost(&mut self) {
-
-    }
+    fn focus_lost(&mut self) {}
 
     fn on_resize(&mut self, size: Size, scale_factor: f64) {
         self.gpu.resize(size.into());

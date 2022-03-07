@@ -3,7 +3,7 @@ use winit::dpi::PhysicalSize;
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Size {
     pub width: f32,
-    pub height: f32
+    pub height: f32,
 }
 
 impl From<PhysicalSize<u32>> for Size {
@@ -28,7 +28,7 @@ impl From<Size> for iced::Size<f32> {
     fn from(size: Size) -> Self {
         Self {
             width: size.width,
-            height: size.height
+            height: size.height,
         }
     }
 }

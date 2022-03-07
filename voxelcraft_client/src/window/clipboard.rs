@@ -1,5 +1,5 @@
-use iced_native::{Command, command};
 use iced_native::clipboard::Action;
+use iced_native::{command, Command};
 
 pub struct Clipboard {
     state: State,
@@ -62,9 +62,7 @@ impl iced_native::Clipboard for Clipboard {
 }
 
 /// Read the current contents of the clipboard.
-pub fn read<Message>(
-    f: impl Fn(Option<String>) -> Message + 'static,
-) -> Command<Message> {
+pub fn read<Message>(f: impl Fn(Option<String>) -> Message + 'static) -> Command<Message> {
     Command::single(command::Action::Clipboard(Action::Read(Box::new(f))))
 }
 

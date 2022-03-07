@@ -1,6 +1,6 @@
-use crate::primitives::{Size, Point2D};
-use iced_native::Event;
+use crate::primitives::{Point2D, Size};
 use iced::mouse::Interaction;
+use iced_native::Event;
 use winit::event::ElementState;
 
 pub trait EventHandler {

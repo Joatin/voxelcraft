@@ -1,34 +1,36 @@
-use crate::gpu::RenderContext;
-use wgpu::{CommandBuffer, Device, PipelineLayout, RenderPipeline, TextureFormat, Queue, BindGroupLayout};
-use crate::interface::Message;
-use voxelcraft_server::local::new_local_world;
-use tokio::task::JoinHandle;
-use crate::game::{LocalGame, Game};
-use std::sync::Arc;
-use std::collections::HashMap;
 use crate::game::block_texture_map::BlockTextureMap;
-use std::error::Error;
-use crate::gpu::primitives::TexturedArrayVertex;
-use winit::dpi::PhysicalSize;
-use crate::primitives::Size;
 use crate::game::camera_pipeline_utils::CameraPipelineUtils;
+use crate::game::{Game, LocalGame};
+use crate::gpu::primitives::TexturedArrayVertex;
+use crate::gpu::RenderContext;
+use crate::interface::Message;
+use crate::primitives::Size;
+use std::collections::HashMap;
+use std::error::Error;
+use std::sync::Arc;
+use tokio::task::JoinHandle;
+use voxelcraft_server::local::new_local_world;
+use wgpu::{
+    BindGroupLayout, CommandBuffer, Device, PipelineLayout, Queue, RenderPipeline, TextureFormat,
+};
+use winit::dpi::PhysicalSize;
 
 enum GameWrapper {
     Local(LocalGame),
-    None
+    None,
 }
 
 impl GameWrapper {
-    fn game(&self) -> Option<& dyn Game> {
+    fn game(&self) -> Option<&dyn Game> {
         match &self {
             Self::Local(game) => Some(game),
-            Self::None => None
+            Self::None => None,
         }
     }
     fn game_mut(&mut self) -> Option<&mut dyn Game> {
         match self {
             Self::Local(game) => Some(game),
-            Self::None => None
+            Self::None => None,
         }
     }
 }
@@ -40,18 +42,24 @@ pub struct GameManager {
     device: Arc<Device>,
     pipelines: Arc<HashMap<String, RenderPipeline>>,
     block_texture_map: Arc<BlockTextureMap>,
-    camera_utils: Arc<CameraPipelineUtils>
+    camera_utils: Arc<CameraPipelineUtils>,
 }
 
 impl GameManager {
-    pub async fn new(device: &Arc<Device>, queue: &Arc<Queue>, texture_format: TextureFormat, size: &PhysicalSize<u32>) -> Result<Self, Box<dyn Error>> {
+    pub async fn new(
+        device: &Arc<Device>,
+        queue: &Arc<Queue>,
+        texture_format: TextureFormat,
+        size: &PhysicalSize<u32>,
+    ) -> Result<Self, Box<dyn Error>> {
         let messages = vec![];
 
         let block_texture_map = Arc::new(BlockTextureMap::new(device, queue).await?);
 
         let camera_utils = Arc::new(CameraPipelineUtils::new(device));
 
-        let pipelines = Self::construct_pipelines(device, texture_format, &block_texture_map, &camera_utils);
+        let pipelines =
+            Self::construct_pipelines(device, texture_format, &block_texture_map, &camera_utils);
 
         Ok(Self {
             messages,
@@ -60,26 +68,43 @@ impl GameManager {
             device: Arc::clone(&device),
             pipelines,
             block_texture_map,
-            camera_utils
+            camera_utils,
         })
     }
 
-    fn construct_pipelines(device: &Arc<Device>, texture_format: TextureFormat, block_texture_map: &Arc<BlockTextureMap>, camera_utils: &Arc<CameraPipelineUtils>) -> Arc<HashMap<String, RenderPipeline>> {
+    fn construct_pipelines(
+        device: &Arc<Device>,
+        texture_format: TextureFormat,
+        block_texture_map: &Arc<BlockTextureMap>,
+        camera_utils: &Arc<CameraPipelineUtils>,
+    ) -> Arc<HashMap<String, RenderPipeline>> {
         let mut map = HashMap::new();
 
-        map.insert("BLOCK".to_string(), Self::construct_block_pipeline(device, texture_format, block_texture_map.bind_group_layout(), camera_utils.bind_group_layout()));
+        map.insert(
+            "BLOCK".to_string(),
+            Self::construct_block_pipeline(
+                device,
+                texture_format,
+                block_texture_map.bind_group_layout(),
+                camera_utils.bind_group_layout(),
+            ),
+        );
 
         Arc::new(map)
     }
 
-    fn construct_block_pipeline(device: &Arc<Device>, texture_format: TextureFormat, bind_group_layout: &BindGroupLayout, camera_bindgroup_layout: &BindGroupLayout) -> RenderPipeline {
+    fn construct_block_pipeline(
+        device: &Arc<Device>,
+        texture_format: TextureFormat,
+        bind_group_layout: &BindGroupLayout,
+        camera_bindgroup_layout: &BindGroupLayout,
+    ) -> RenderPipeline {
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
                 bind_group_layouts: &[bind_group_layout, camera_bindgroup_layout],
                 push_constant_ranges: &[],
             });
-
 
         let shader = device.create_shader_module(&wgpu::include_wgsl!("shaders/block_shader.wgsl"));
 
@@ -89,9 +114,7 @@ impl GameManager {
             vertex: wgpu::VertexState {
                 module: &shader,
                 entry_point: "vs_main",
-                buffers: &[
-                    TexturedArrayVertex::desc()
-                ],
+                buffers: &[TexturedArrayVertex::desc()],
             },
             primitive: wgpu::PrimitiveState {
                 topology: wgpu::PrimitiveTopology::TriangleList,
@@ -105,10 +128,12 @@ impl GameManager {
                 // Requires Features::CONSERVATIVE_RASTERIZATION
                 conservative: false,
             },
-            fragment: Some(wgpu::FragmentState { // 3.
+            fragment: Some(wgpu::FragmentState {
+                // 3.
                 module: &shader,
                 entry_point: "fs_main",
-                targets: &[wgpu::ColorTargetState { // 4.
+                targets: &[wgpu::ColorTargetState {
+                    // 4.
                     format: texture_format,
                     blend: Some(wgpu::BlendState::REPLACE),
                     write_mask: wgpu::ColorWrites::ALL,
@@ -143,15 +168,23 @@ impl GameManager {
             Message::CreateNewGame => {
                 let device = Arc::clone(&self.device);
                 self.create_new_world(device)
-            },
+            }
             _ => {}
         }
     }
 
     fn create_new_world(&mut self, device: Arc<Device>) {
         log::info!("Creating a new world!");
-        self.messages.push(Message::GameLoadingMessage("Creating new game".to_string(), None));
-        let local_game = LocalGame::new(device, &self.pipelines, &self.block_texture_map, Arc::clone(&self.camera_utils));
+        self.messages.push(Message::GameLoadingMessage(
+            "Creating new game".to_string(),
+            None,
+        ));
+        let local_game = LocalGame::new(
+            device,
+            &self.pipelines,
+            &self.block_texture_map,
+            Arc::clone(&self.camera_utils),
+        );
         self.game = GameWrapper::Local(local_game)
     }
 

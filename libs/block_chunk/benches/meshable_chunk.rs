@@ -1,6 +1,6 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use block_chunk::mesh::{BlockDescriptor, MeshableChunk};
 use block_chunk::Chunk;
-use block_chunk::mesh::{MeshableChunk, BlockDescriptor};
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use tokio::runtime::Runtime;
 
 pub fn meshable_chunk(c: &mut Criterion) {
@@ -10,7 +10,12 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("fast_mesh box 64", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|_| black_box(Some(BlockDescriptor { is_standard_square: true, is_transparent: false })))
+                chunk.fast_mesh(|_| {
+                    black_box(Some(BlockDescriptor {
+                        is_standard_square: true,
+                        is_transparent: false,
+                    }))
+                })
             })
         });
     }
@@ -19,7 +24,12 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("fast_mesh box 32", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|_| black_box(Some(BlockDescriptor { is_standard_square: true, is_transparent: false })))
+                chunk.fast_mesh(|_| {
+                    black_box(Some(BlockDescriptor {
+                        is_standard_square: true,
+                        is_transparent: false,
+                    }))
+                })
             })
         });
     }
@@ -28,7 +38,12 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("fast_mesh box 16", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|_| black_box(Some(BlockDescriptor { is_standard_square: true, is_transparent: false })))
+                chunk.fast_mesh(|_| {
+                    black_box(Some(BlockDescriptor {
+                        is_standard_square: true,
+                        is_transparent: false,
+                    }))
+                })
             })
         });
     }
@@ -37,7 +52,12 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("fast_mesh box 8", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|_| black_box(Some(BlockDescriptor { is_standard_square: true, is_transparent: false })))
+                chunk.fast_mesh(|_| {
+                    black_box(Some(BlockDescriptor {
+                        is_standard_square: true,
+                        is_transparent: false,
+                    }))
+                })
             })
         });
     }
@@ -46,7 +66,12 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("fast_mesh box 4", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|_| black_box(Some(BlockDescriptor { is_standard_square: true, is_transparent: false })))
+                chunk.fast_mesh(|_| {
+                    black_box(Some(BlockDescriptor {
+                        is_standard_square: true,
+                        is_transparent: false,
+                    }))
+                })
             })
         });
     }
@@ -57,10 +82,15 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("fast_mesh checker 64", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|val| if *val == 0 {
-                    None
-                } else {
-                    Some(BlockDescriptor { is_standard_square: true, is_transparent: false })
+                chunk.fast_mesh(|val| {
+                    if *val == 0 {
+                        None
+                    } else {
+                        Some(BlockDescriptor {
+                            is_standard_square: true,
+                            is_transparent: false,
+                        })
+                    }
                 })
             })
         });
@@ -70,10 +100,15 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("fast_mesh checker 32", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|val| if *val == 0 {
-                    None
-                } else {
-                    Some(BlockDescriptor { is_standard_square: true, is_transparent: false })
+                chunk.fast_mesh(|val| {
+                    if *val == 0 {
+                        None
+                    } else {
+                        Some(BlockDescriptor {
+                            is_standard_square: true,
+                            is_transparent: false,
+                        })
+                    }
                 })
             })
         });
@@ -83,10 +118,15 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("fast_mesh checker 16", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|val| if *val == 0 {
-                    None
-                } else {
-                    Some(BlockDescriptor { is_standard_square: true, is_transparent: false })
+                chunk.fast_mesh(|val| {
+                    if *val == 0 {
+                        None
+                    } else {
+                        Some(BlockDescriptor {
+                            is_standard_square: true,
+                            is_transparent: false,
+                        })
+                    }
                 })
             })
         });
@@ -96,10 +136,15 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("fast_mesh checker 8", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|val| if *val == 0 {
-                    None
-                } else {
-                    Some(BlockDescriptor { is_standard_square: true, is_transparent: false })
+                chunk.fast_mesh(|val| {
+                    if *val == 0 {
+                        None
+                    } else {
+                        Some(BlockDescriptor {
+                            is_standard_square: true,
+                            is_transparent: false,
+                        })
+                    }
                 })
             })
         });
@@ -109,10 +154,15 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("fast_mesh checker 4", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|val| if *val == 0 {
-                    None
-                } else {
-                    Some(BlockDescriptor { is_standard_square: true, is_transparent: false })
+                chunk.fast_mesh(|val| {
+                    if *val == 0 {
+                        None
+                    } else {
+                        Some(BlockDescriptor {
+                            is_standard_square: true,
+                            is_transparent: false,
+                        })
+                    }
                 })
             })
         });
@@ -125,7 +175,12 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("greedy_mesh box 64", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|_| black_box(Some(BlockDescriptor { is_standard_square: true, is_transparent: false })))
+                chunk.greedy_mesh(|_| {
+                    black_box(Some(BlockDescriptor {
+                        is_standard_square: true,
+                        is_transparent: false,
+                    }))
+                })
             })
         });
     }
@@ -134,7 +189,12 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("greedy_mesh box 32", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|_| black_box(Some(BlockDescriptor { is_standard_square: true, is_transparent: false })))
+                chunk.greedy_mesh(|_| {
+                    black_box(Some(BlockDescriptor {
+                        is_standard_square: true,
+                        is_transparent: false,
+                    }))
+                })
             })
         });
     }
@@ -143,7 +203,12 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("greedy_mesh box 16", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|_| black_box(Some(BlockDescriptor { is_standard_square: true, is_transparent: false })))
+                chunk.greedy_mesh(|_| {
+                    black_box(Some(BlockDescriptor {
+                        is_standard_square: true,
+                        is_transparent: false,
+                    }))
+                })
             })
         });
     }
@@ -152,7 +217,12 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("greedy_mesh box 8", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|_| black_box(Some(BlockDescriptor { is_standard_square: true, is_transparent: false })))
+                chunk.greedy_mesh(|_| {
+                    black_box(Some(BlockDescriptor {
+                        is_standard_square: true,
+                        is_transparent: false,
+                    }))
+                })
             })
         });
     }
@@ -161,7 +231,12 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("greedy_mesh box 4", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|_| black_box(Some(BlockDescriptor { is_standard_square: true, is_transparent: false })))
+                chunk.greedy_mesh(|_| {
+                    black_box(Some(BlockDescriptor {
+                        is_standard_square: true,
+                        is_transparent: false,
+                    }))
+                })
             })
         });
     }
@@ -172,10 +247,15 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("greedy_mesh checker 64", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|val| if *val == 0 {
-                    None
-                } else {
-                    Some(BlockDescriptor { is_standard_square: true, is_transparent: false })
+                chunk.greedy_mesh(|val| {
+                    if *val == 0 {
+                        None
+                    } else {
+                        Some(BlockDescriptor {
+                            is_standard_square: true,
+                            is_transparent: false,
+                        })
+                    }
                 })
             })
         });
@@ -185,10 +265,15 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("greedy_mesh checker 32", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|val| if *val == 0 {
-                    None
-                } else {
-                    Some(BlockDescriptor { is_standard_square: true, is_transparent: false })
+                chunk.greedy_mesh(|val| {
+                    if *val == 0 {
+                        None
+                    } else {
+                        Some(BlockDescriptor {
+                            is_standard_square: true,
+                            is_transparent: false,
+                        })
+                    }
                 })
             })
         });
@@ -198,10 +283,15 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("greedy_mesh checker 16", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|val| if *val == 0 {
-                    None
-                } else {
-                    Some(BlockDescriptor { is_standard_square: true, is_transparent: false })
+                chunk.greedy_mesh(|val| {
+                    if *val == 0 {
+                        None
+                    } else {
+                        Some(BlockDescriptor {
+                            is_standard_square: true,
+                            is_transparent: false,
+                        })
+                    }
                 })
             })
         });
@@ -211,10 +301,15 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("greedy_mesh checker 8", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|val| if *val == 0 {
-                    None
-                } else {
-                    Some(BlockDescriptor { is_standard_square: true, is_transparent: false })
+                chunk.greedy_mesh(|val| {
+                    if *val == 0 {
+                        None
+                    } else {
+                        Some(BlockDescriptor {
+                            is_standard_square: true,
+                            is_transparent: false,
+                        })
+                    }
                 })
             })
         });
@@ -224,10 +319,15 @@ pub fn meshable_chunk(c: &mut Criterion) {
         c.bench_function("greedy_mesh checker 4", |b| {
             let runtime = Runtime::new().unwrap();
             b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|val| if *val == 0 {
-                    None
-                } else {
-                    Some(BlockDescriptor { is_standard_square: true, is_transparent: false })
+                chunk.greedy_mesh(|val| {
+                    if *val == 0 {
+                        None
+                    } else {
+                        Some(BlockDescriptor {
+                            is_standard_square: true,
+                            is_transparent: false,
+                        })
+                    }
                 })
             })
         });

@@ -9,11 +9,10 @@ pub const CHUNK_SIZE: usize = 32;
 #[derive(Debug, Clone, bincode::Encode, bincode::Decode)]
 pub struct Chunk {
     blocks: BlockMap,
-    chunk_position: ChunkPosition
+    chunk_position: ChunkPosition,
 }
 
 impl Chunk {
-
     pub fn position(&self) -> ChunkPosition {
         self.chunk_position
     }
@@ -21,7 +20,7 @@ impl Chunk {
     pub fn new(chunk_position: ChunkPosition) -> Self {
         Self {
             blocks: BlockMap::new(),
-            chunk_position
+            chunk_position,
         }
     }
 

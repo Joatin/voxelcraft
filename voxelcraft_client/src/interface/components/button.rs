@@ -1,5 +1,5 @@
-use iced::{Button, Text, Length};
 use iced::alignment::Horizontal;
+use iced::{Button, Length, Text};
 
 pub fn button<'a, Message: Clone>(
     state: &'a mut iced::button::State,
@@ -7,8 +7,10 @@ pub fn button<'a, Message: Clone>(
 ) -> Button<'a, Message> {
     Button::new(
         state,
-        Text::new(label).horizontal_alignment(Horizontal::Center).width(Length::Fill),
+        Text::new(label)
+            .horizontal_alignment(Horizontal::Center)
+            .width(Length::Fill),
     )
-        .padding(16)
-        .min_width(100)
+    .padding(16)
+    .min_width(100)
 }

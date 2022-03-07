@@ -1,5 +1,3 @@
 use crate::Entity;
 
-pub trait Item: Entity {
-
-}
+pub trait Item: Entity {}

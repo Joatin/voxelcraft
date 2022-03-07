@@ -1,21 +1,19 @@
-use voxelcraft_mod::{Dimension, DEFAULT_DIMENSION_ID};
-use uuid::Uuid;
-use std::sync::Arc;
-use voxelcraft_mod::world_generator::WorldGenerator;
 use crate::world::DefaultWorldGenerator;
 use std::ops::Deref;
+use std::sync::Arc;
+use uuid::Uuid;
+use voxelcraft_mod::world_generator::WorldGenerator;
+use voxelcraft_mod::{Dimension, DEFAULT_DIMENSION_ID};
 
 #[derive(Debug)]
 pub struct DefaultDimension {
-    world_generator: Arc<dyn WorldGenerator>
+    world_generator: Arc<dyn WorldGenerator>,
 }
 
 impl DefaultDimension {
     pub fn new() -> Self {
         let world_generator = Arc::new(DefaultWorldGenerator::new());
-        Self {
-            world_generator
-        }
+        Self { world_generator }
     }
 }
 
