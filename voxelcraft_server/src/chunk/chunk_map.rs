@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::error::Error;
 use std::sync::Arc;
-use tokio::sync::{Mutex, RwLock};
+use tokio::sync::{RwLock};
 use uuid::Uuid;
 use voxelcraft_core::chunk::{Chunk, ChunkPosition};
 use voxelcraft_mod::Dimension;

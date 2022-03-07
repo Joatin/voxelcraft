@@ -1,12 +1,12 @@
-use crate::context::Context;
+
 use crate::gpu::RenderContext;
-use futures::Future;
-use pollster::FutureExt;
+
+
 use std::sync::Arc;
 use std::time::Instant;
-use wgpu::{CommandBuffer, TextureFormat, TextureView};
+use wgpu::{CommandBuffer, TextureFormat};
 use winit::dpi::PhysicalSize;
-use winit::event::WindowEvent;
+
 use winit::window::Window;
 
 pub struct Gpu {
@@ -132,11 +132,11 @@ impl Gpu {
 
     pub fn start_render_pass<'a, T: FnOnce(RenderContext) -> Vec<CommandBuffer>>(
         &'a mut self,
-        mut render_callback: T,
+        render_callback: T,
     ) -> Result<(), wgpu::SurfaceError> {
         let output = self.surface.get_current_texture()?;
 
-        let start_draw_time = Instant::now();
+        let _start_draw_time = Instant::now();
 
         let view = Arc::new(
             output

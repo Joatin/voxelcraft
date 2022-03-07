@@ -26,7 +26,7 @@ pub async fn greedy_mesh<
 #[cfg(test)]
 mod tests {
     use crate::mesh::internal::greedy_mesh;
-    use crate::mesh::{BlockDescriptor, MeshableChunk};
+    use crate::mesh::{BlockDescriptor};
     use crate::Chunk;
 
     #[tokio::test]

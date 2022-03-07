@@ -5,9 +5,9 @@ use crate::interface::page::Page;
 use crate::interface::pages::options_page::OPTIONS_PAGE_ROUTE;
 use crate::interface::pages::WORLD_SELECTION_PAGE_ROUTE;
 use iced::alignment::Horizontal;
-use iced::widget::Button;
+
 use iced::widget::Text;
-use iced::{button, Alignment, Color, Column, Element, Length, Row, Space};
+use iced::{button, Alignment, Color, Column, Element, Length, Space};
 use iced_native::Font;
 
 pub const MAIN_PAGE_ROUTE: &str = "MAIN";

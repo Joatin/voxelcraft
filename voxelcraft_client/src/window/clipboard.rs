@@ -23,6 +23,7 @@ impl Clipboard {
 
     /// Creates a new [`Clipboard`] that isn't associated with a window.
     /// This clipboard will never contain a copied value.
+    #[allow(dead_code)]
     pub fn unconnected() -> Clipboard {
         Clipboard {
             state: State::Unavailable,
@@ -30,6 +31,7 @@ impl Clipboard {
     }
 
     /// Reads the current content of the [`Clipboard`] as text.
+    #[allow(dead_code)]
     pub fn read(&self) -> Option<String> {
         match &self.state {
             State::Connected(clipboard) => clipboard.read().ok(),
@@ -38,6 +40,7 @@ impl Clipboard {
     }
 
     /// Writes the given text contents to the [`Clipboard`].
+    #[allow(dead_code)]
     pub fn write(&mut self, contents: String) {
         match &mut self.state {
             State::Connected(clipboard) => match clipboard.write(contents) {
@@ -62,11 +65,13 @@ impl iced_native::Clipboard for Clipboard {
 }
 
 /// Read the current contents of the clipboard.
+#[allow(dead_code)]
 pub fn read<Message>(f: impl Fn(Option<String>) -> Message + 'static) -> Command<Message> {
     Command::single(command::Action::Clipboard(Action::Read(Box::new(f))))
 }
 
 /// Write the given contents to the clipboard.
+#[allow(dead_code)]
 pub fn write<Message>(contents: String) -> Command<Message> {
     Command::single(command::Action::Clipboard(Action::Write(contents)))
 }

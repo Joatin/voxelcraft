@@ -1,12 +1,11 @@
-use crate::game::{Game, LocalGame};
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use crate::game::{Game};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::sync::RwLock;
+
 
 #[derive(Debug)]
 pub struct Context {
-    current_route: std::sync::RwLock<String>,
     show_debug: AtomicBool,
     current_fps: std::sync::Mutex<f64>,
     time_to_draw_frame: std::sync::Mutex<Duration>,
@@ -16,16 +15,11 @@ pub struct Context {
 impl Context {
     pub fn new() -> Self {
         Self {
-            current_route: std::sync::RwLock::new("HOME".to_owned()),
             show_debug: AtomicBool::new(false),
             current_fps: std::sync::Mutex::new(0.0),
             time_to_draw_frame: std::sync::Mutex::new(Duration::default()),
             game: None,
         }
-    }
-
-    pub fn get_current_route(&self) -> String {
-        self.current_route.read().unwrap().to_string()
     }
 
     pub fn get_game(&self) -> &Option<Arc<dyn Game>> {

@@ -1,9 +1,8 @@
 use crate::gpu::{Gpu, RenderContext};
 use crate::interface::message::Message;
-use crate::interface::page::Page;
 use crate::interface::pages::get_default_pages;
 use crate::interface::pages::{
-    MainPage, WorldSelectionPage, MAIN_PAGE_ROUTE, WORLD_SELECTION_PAGE_ROUTE,
+    MAIN_PAGE_ROUTE,
 };
 use crate::interface::router::Router;
 use crate::interface::router_flags::RouterFlags;
@@ -16,7 +15,7 @@ use iced_native::user_interface::Cache;
 use iced_native::{Debug, Event, UserInterface};
 use iced_wgpu::Settings;
 use iced_wgpu::{Backend, Renderer, Viewport};
-use std::collections::HashMap;
+
 use wgpu::util::StagingBelt;
 use wgpu::CommandBuffer;
 
@@ -50,7 +49,7 @@ impl Interface {
         let messages = vec![];
         let events = vec![];
 
-        let mut pages = get_default_pages();
+        let pages = get_default_pages();
         let (router, _) = Router::new(RouterFlags {
             pages,
             initial_route: MAIN_PAGE_ROUTE.to_string(),
@@ -105,7 +104,7 @@ impl Interface {
             &mut self.renderer,
         );
 
-        let event_statuses = user_interface.update(
+        let _event_statuses = user_interface.update(
             &self.events,
             self.cursor_position.into(),
             &mut self.renderer,

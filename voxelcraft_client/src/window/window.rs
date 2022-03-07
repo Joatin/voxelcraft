@@ -2,7 +2,7 @@ use crate::window::convert_window_event::convert_window_event;
 use crate::window::EventHandler;
 use iced::mouse::Interaction;
 use std::error::Error;
-use winit::dpi::{LogicalPosition, PhysicalPosition};
+use winit::dpi::{PhysicalPosition};
 use winit::event::{DeviceEvent, Event, ModifiersState, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::{CursorIcon, WindowBuilder};
@@ -28,7 +28,7 @@ impl Window {
         &self.internal_window
     }
 
-    pub fn run<T: 'static + EventHandler>(mut self, mut event_handler: T) {
+    pub fn run<T: 'static + EventHandler>(self, mut event_handler: T) {
         log::info!("Starting event loop");
 
         let window = self.internal_window;
@@ -36,7 +36,7 @@ impl Window {
 
         tokio::task::block_in_place(move || {
             self.event_loop
-                .run(move |event, _target, mut control_flow| {
+                .run(move |event, _target, control_flow| {
                     *control_flow = ControlFlow::Poll;
                     Self::handle_event(
                         &window,
@@ -52,7 +52,7 @@ impl Window {
     fn handle_event<T: EventHandler>(
         window: &winit::window::Window,
         event: Event<()>,
-        mut control_flow: &mut ControlFlow,
+        control_flow: &mut ControlFlow,
         event_handler: &mut T,
         modifiers: &mut ModifiersState,
     ) {
@@ -107,7 +107,7 @@ impl Window {
     fn handle_window_event<T: EventHandler>(
         window: &winit::window::Window,
         event: WindowEvent,
-        mut control_flow: &mut ControlFlow,
+        control_flow: &mut ControlFlow,
         event_handler: &mut T,
         modifiers: &mut ModifiersState,
     ) {
@@ -145,7 +145,7 @@ impl Window {
                     window.set_cursor_position(PhysicalPosition {
                         x: window.inner_size().width / 2,
                         y: window.inner_size().height / 2,
-                    });
+                    }).unwrap();
                 };
             }
             WindowEvent::CursorEntered { .. } => {}

@@ -11,7 +11,6 @@ use wgpu::{Buffer, BufferDescriptor, BufferUsages, Device, IndexFormat, RenderPa
 pub struct ChunkMesh {
     vertex_buffer: Buffer,
     index_buffer: Buffer,
-    vertex_count: u32,
     index_count: u32,
 }
 
@@ -64,12 +63,10 @@ impl ChunkMesh {
             buffer
         };
 
-        let vertex_count = mesh.len() as u32;
         let index_count = indices.len() as u32;
 
         Self {
             vertex_buffer,
-            vertex_count,
             index_buffer,
             index_count,
         }
@@ -339,7 +336,7 @@ impl ChunkMesh {
 
     pub fn render<'a>(
         &'a mut self,
-        render_context: &RenderContext,
+        _render_context: &RenderContext,
         render_pass: &mut RenderPass<'a>,
     ) {
         render_pass.set_index_buffer(self.index_buffer.slice(..), IndexFormat::Uint32);

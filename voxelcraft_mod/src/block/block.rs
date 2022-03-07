@@ -1,5 +1,5 @@
 use std::fmt::Debug;
-use std::sync::Arc;
+
 use uuid::Uuid;
 
 #[async_trait::async_trait]

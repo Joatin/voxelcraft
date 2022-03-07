@@ -1,23 +1,22 @@
 use crate::application_event_handler::ApplicationEventHandler;
-use crate::context::Context;
+
 use crate::game::GameManager;
 use crate::gpu::Gpu;
 use crate::interface::Interface;
 use crate::window::Window;
 use log::LevelFilter;
-use pollster::FutureExt;
 use simplelog::{ColorChoice, Config, TermLogger, TerminalMode};
-use std::sync::Arc;
+
 use voxelcraft_mod::ModPack;
 
 #[tokio::main(flavor = "multi_thread")]
-pub async fn setup_voxelcraft<T: ModPack>(mod_pack: T) {
+pub async fn setup_voxelcraft<T: ModPack>(_mod_pack: T) {
     TermLogger::init(
         LevelFilter::Info,
         Config::default(),
         TerminalMode::Mixed,
         ColorChoice::Auto,
-    );
+    ).unwrap();
 
     let window = Window::create("Voxelcraft").unwrap();
     let gpu = Gpu::new(window.window()).await;

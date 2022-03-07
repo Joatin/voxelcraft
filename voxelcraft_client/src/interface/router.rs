@@ -1,11 +1,11 @@
 use crate::interface::message::Message;
-use crate::interface::message::Message::Navigate;
+
 use crate::interface::page::Page;
-use crate::interface::pages::{MainPage, GAME_LOADING_PAGE_ROUTE};
+use crate::interface::pages::{GAME_LOADING_PAGE_ROUTE};
 use crate::interface::router_flags::RouterFlags;
-use iced::button::State;
-use iced::{alignment, Application, Button, Command, Container, Element, Length, Text};
-use iced_native::Widget;
+
+use iced::{Application, Command, Element};
+
 use std::collections::HashMap;
 
 pub struct Router {

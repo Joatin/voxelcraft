@@ -1,4 +1,4 @@
-use crate::mesh::{Corner, FaceDirection};
+use crate::mesh::{FaceDirection};
 use crate::BlockOffset;
 use std::error::Error;
 
@@ -200,7 +200,7 @@ impl<const SIZE: usize> Face<SIZE> {
 
 #[cfg(test)]
 mod tests {
-    use crate::mesh::{Corner, Face, FaceDirection};
+    use crate::mesh::{Face};
     use crate::BlockOffset;
 
     #[test]

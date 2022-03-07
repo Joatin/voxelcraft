@@ -1,13 +1,13 @@
-use crate::mesh::{Corner, Face, FaceDirection, MeshResult};
-use crate::Chunk;
-use std::cmp::Ordering;
+use crate::mesh::{Face};
+
+
 
 pub fn join_faces<const SIZE: usize>(faces: Vec<Face<SIZE>>) -> Vec<Face<SIZE>> {
     let rows = join_rows(faces);
     join_columns(rows)
 }
 
-fn join_rows<const SIZE: usize>(mut faces: Vec<Face<SIZE>>) -> Vec<Face<SIZE>> {
+fn join_rows<const SIZE: usize>(faces: Vec<Face<SIZE>>) -> Vec<Face<SIZE>> {
     let mut faces = faces.into_iter().map(|f| Some(f)).collect::<Vec<_>>();
     let mut rows = vec![];
 
@@ -40,7 +40,7 @@ fn join_columns<const SIZE: usize>(mut faces: Vec<Face<SIZE>>) -> Vec<Face<SIZE>
         while let Some((index, _next_face)) = faces
             .iter()
             .enumerate()
-            .find(|(i, face)| current_face.can_merge_column(*face))
+            .find(|(_i, face)| current_face.can_merge_column(*face))
         {
             current_face
                 .try_merge_face_column(faces.remove(index))

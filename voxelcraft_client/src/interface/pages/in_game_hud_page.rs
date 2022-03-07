@@ -1,8 +1,8 @@
 use crate::interface::message::Message;
 use crate::interface::page::Page;
 use crate::interface::pages::in_game_menu::IN_GAME_MENU_PAGE_ROUTE;
-use crate::interface::pages::MAIN_PAGE_ROUTE;
-use iced::{Column, Command, Element, Length, Space, Text};
+
+use iced::{Column, Element, Length, Space, Text};
 
 pub const IN_GAME_HUD_PAGE_ROUTE: &str = "IN_GAME_HUD";
 

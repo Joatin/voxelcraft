@@ -1,6 +1,6 @@
 use crate::mesh::internal::handle_block::handle_block;
-use crate::mesh::{BlockDescriptor, Corner, Face, FaceDirection, MeshResult};
-use crate::{BlockOffset, Chunk};
+use crate::mesh::{BlockDescriptor, MeshResult};
+use crate::{Chunk};
 
 pub async fn fast_mesh<T, C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>, const SIZE: usize>(
     chunk: &Chunk<T, SIZE>,

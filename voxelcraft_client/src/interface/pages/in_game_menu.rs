@@ -4,8 +4,8 @@ use crate::interface::message::Message;
 use crate::interface::page::Page;
 use crate::interface::pages::OPTIONS_PAGE_ROUTE;
 use crate::interface::IN_GAME_HUD_PAGE_ROUTE;
-use iced::alignment::Horizontal;
-use iced::{button, Alignment, Color, Column, Element, Font, Length, Space, Text};
+
+use iced::{button, Alignment, Column, Element, Length, Space};
 
 pub const IN_GAME_MENU_PAGE_ROUTE: &str = "IN_GAME_MENU";
 

@@ -9,9 +9,9 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::sync::Arc;
 use tokio::task::JoinHandle;
-use voxelcraft_server::local::new_local_world;
+
 use wgpu::{
-    BindGroupLayout, CommandBuffer, Device, PipelineLayout, Queue, RenderPipeline, TextureFormat,
+    BindGroupLayout, CommandBuffer, Device, Queue, RenderPipeline, TextureFormat,
 };
 use winit::dpi::PhysicalSize;
 
@@ -50,7 +50,7 @@ impl GameManager {
         device: &Arc<Device>,
         queue: &Arc<Queue>,
         texture_format: TextureFormat,
-        size: &PhysicalSize<u32>,
+        _size: &PhysicalSize<u32>,
     ) -> Result<Self, Box<dyn Error>> {
         let messages = vec![];
 

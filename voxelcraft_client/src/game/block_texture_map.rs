@@ -10,7 +10,7 @@ pub struct BlockTextureMap {
 }
 
 impl BlockTextureMap {
-    pub async fn new(device: &Arc<Device>, queue: &Arc<Queue>) -> Result<Self, Box<dyn Error>> {
+    pub async fn new(device: &Arc<Device>, _queue: &Arc<Queue>) -> Result<Self, Box<dyn Error>> {
         let texture_size = Extent3d {
             width: 32,
             height: 32,
@@ -98,7 +98,7 @@ impl BlockTextureMap {
         })
     }
 
-    pub fn get_texture_index_for_face(&self, block_id: u32) -> i32 {
+    pub fn get_texture_index_for_face(&self, _block_id: u32) -> i32 {
         0
     }
 

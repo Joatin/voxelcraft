@@ -121,6 +121,7 @@ pub fn convert_window_event(
 /// Converts a [`Position`] to a [`winit`] logical position for a given monitor.
 ///
 /// [`winit`]: https://github.com/rust-windowing/winit
+#[allow(dead_code)]
 pub fn position(
     monitor: Option<&winit::monitor::MonitorHandle>,
     (width, height): (u32, u32),
@@ -163,6 +164,7 @@ pub fn position(
 /// Converts a [`Mode`] to a [`winit`] fullscreen mode.
 ///
 /// [`winit`]: https://github.com/rust-windowing/winit
+#[allow(dead_code)]
 pub fn fullscreen(
     monitor: Option<winit::monitor::MonitorHandle>,
     mode: Mode,
@@ -174,6 +176,7 @@ pub fn fullscreen(
 }
 
 /// Converts a [`Mode`] to a visibility flag.
+#[allow(dead_code)]
 pub fn visible(mode: Mode) -> bool {
     match mode {
         Mode::Windowed | Mode::Fullscreen => true,
@@ -185,6 +188,7 @@ pub fn visible(mode: Mode) -> bool {
 ///
 /// [`winit`]: https://github.com/rust-windowing/winit
 /// [`iced_native`]: https://github.com/hecrj/iced/tree/master/native
+#[allow(dead_code)]
 pub fn mouse_interaction(interaction: mouse::Interaction) -> winit::window::CursorIcon {
     use mouse::Interaction;
 
@@ -231,6 +235,7 @@ pub fn modifiers(modifiers: winit::event::ModifiersState) -> keyboard::Modifiers
 }
 
 /// Converts a physical cursor position to a logical `Point`.
+#[allow(dead_code)]
 pub fn cursor_position(position: winit::dpi::PhysicalPosition<f64>, scale_factor: f64) -> Point {
     let logical_position = position.to_logical(scale_factor);
 

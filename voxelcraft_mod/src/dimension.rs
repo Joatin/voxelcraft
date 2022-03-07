@@ -1,6 +1,6 @@
 use crate::world_generator::WorldGenerator;
 use std::fmt::Debug;
-use std::sync::Arc;
+
 use uuid::Uuid;
 
 /// The id of the dimension a user will first spawn within

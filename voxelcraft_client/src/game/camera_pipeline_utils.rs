@@ -7,7 +7,7 @@ use std::num::NonZeroU64;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use wgpu::util::StagingBelt;
-use wgpu::{BindGroup, BindGroupLayout, Buffer, BufferDescriptor, CommandEncoder, Device, MapMode};
+use wgpu::{BindGroup, BindGroupLayout, Buffer, BufferDescriptor, CommandEncoder, Device};
 
 pub struct CameraPipelineUtils {
     bind_group_layout: BindGroupLayout,
@@ -17,7 +17,7 @@ pub struct CameraPipelineUtils {
 }
 
 impl Debug for CameraPipelineUtils {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
         todo!()
     }
 }

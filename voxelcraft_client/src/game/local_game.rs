@@ -1,5 +1,5 @@
 use crate::chunk::{ChunkMesh, MeshableChunk};
-use crate::context::Context;
+
 use crate::game::block_texture_map::BlockTextureMap;
 use crate::game::camera_pipeline_utils::CameraPipelineUtils;
 use crate::game::game::Game;
@@ -19,11 +19,11 @@ use uuid::Uuid;
 use voxelcraft_server::client::Client;
 use voxelcraft_server::local::new_local_world;
 use voxelcraft_server::local::LocalClient;
-use wgpu::util::DeviceExt;
+
 use wgpu::{
-    Buffer, CommandBuffer, CommandEncoderDescriptor, Device, RenderPassDescriptor, RenderPipeline,
+    CommandBuffer, CommandEncoderDescriptor, Device, RenderPassDescriptor, RenderPipeline,
 };
-use winit::dpi::PhysicalSize;
+
 
 #[derive(Debug)]
 pub struct LocalGame {

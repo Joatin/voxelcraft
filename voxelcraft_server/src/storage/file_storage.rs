@@ -15,15 +15,15 @@ impl FileStorage {
 impl Storage for FileStorage {
     async fn save_chunk_blocks(
         &self,
-        encoded_blocks: &[u8],
-        chunk_position: ChunkPosition,
+        _encoded_blocks: &[u8],
+        _chunk_position: ChunkPosition,
     ) -> Result<(), Box<dyn Error>> {
         todo!()
     }
 
     async fn load_chunk_blocks(
         &self,
-        chunk_position: ChunkPosition,
+        _chunk_position: ChunkPosition,
     ) -> Result<Vec<u8>, Box<dyn Error>> {
         todo!()
     }

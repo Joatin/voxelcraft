@@ -1,6 +1,6 @@
 use crate::interface::message::Message;
 use crate::interface::page::Page;
-use iced::{Column, Command, Element, Length, ProgressBar, Space, Text};
+use iced::{Column, Element, Length, ProgressBar, Space, Text};
 use iced_native::Alignment;
 
 pub const GAME_LOADING_PAGE_ROUTE: &str = "GAME_LOADING";
@@ -25,7 +25,7 @@ impl Page for GameLoadingPage {
     }
 
     fn view(&mut self) -> Element<'_, Message> {
-        let mut column = Column::new()
+        let column = Column::new()
             .align_items(Alignment::Center)
             .width(Length::Fill)
             .push(Space::new(Length::Shrink, Length::Fill))

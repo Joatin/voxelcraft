@@ -4,7 +4,7 @@ use crate::world::World;
 use std::error::Error;
 use std::sync::Arc;
 use tokio::sync::broadcast;
-use tokio::sync::Mutex;
+
 use uuid::Uuid;
 use voxelcraft_core::chunk::{Chunk, ChunkPosition};
 use voxelcraft_core::entity::EntityPosition;

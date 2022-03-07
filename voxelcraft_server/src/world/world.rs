@@ -71,7 +71,7 @@ impl World {
         {
             let mut lock = self.incoming_events_receiver.lock().await;
             let mut events_processed = 0;
-            while let Ok(event) = lock.try_recv() {
+            while let Ok(_event) = lock.try_recv() {
                 events_processed += 1;
             }
             log::debug!("Processed {} events", events_processed);
@@ -120,12 +120,12 @@ impl World {
         self.chunk_map.get(&chunk_position).await
     }
 
-    pub fn get_compressed_chunk(&self, chunk_position: ChunkPosition) -> &CompressedChunk {
+    pub fn get_compressed_chunk(&self, _chunk_position: ChunkPosition) -> &CompressedChunk {
         todo!()
     }
 
     pub async fn get_player_position(&self, player_id: Uuid) -> Option<EntityPosition> {
-        let mut players = self.players.lock().await;
+        let players = self.players.lock().await;
         players.get(&player_id).map(|p| p.position().clone())
     }
 

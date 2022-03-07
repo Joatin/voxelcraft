@@ -5,7 +5,7 @@ use crate::primitives::{Point2D, Size};
 use crate::window::EventHandler;
 use iced::mouse::Interaction;
 use iced_native::Event;
-use iced_wgpu::wgpu::SurfaceError;
+
 use winit::event::ElementState;
 
 pub struct ApplicationEventHandler {
@@ -32,7 +32,7 @@ impl EventHandler for ApplicationEventHandler {
         match self.gpu.start_render_pass(|render_context| {
             let mut buffers = self.game_manager.render(&render_context);
             let game_messages = self.game_manager.get_messages();
-            let (buffer, cursor, should_quit) =
+            let (buffer, _cursor, should_quit) =
                 self.interface.render(&render_context, game_messages, |m| {
                     self.game_manager.process_message(m)
                 });

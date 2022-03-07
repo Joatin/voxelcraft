@@ -1,7 +1,7 @@
 use crate::mesh::internal::fast_mesh;
 use crate::mesh::internal::greedy_mesh;
 use crate::mesh::{BlockDescriptor, MeshResult};
-use crate::{BlockOffset, Chunk};
+use crate::{Chunk};
 
 #[async_trait::async_trait]
 pub trait MeshableChunk<T, const SIZE: usize> {
@@ -44,6 +44,6 @@ mod tests {
     async fn fast_mesh_should_not_panic() {
         let chunk = Chunk::<usize, 16>::default();
 
-        let res = chunk.fast_mesh(|_block_id| None).await;
+        let _res = chunk.fast_mesh(|_block_id| None).await;
     }
 }

@@ -1,6 +1,6 @@
 use crate::primitives::{Point2D, Size};
-use iced_native::Clipboard;
-use std::sync::{Arc, Mutex};
+
+use std::sync::{Arc};
 use wgpu::{Device, TextureView};
 use winit::dpi::PhysicalSize;
 
