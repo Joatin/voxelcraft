@@ -1,6 +1,6 @@
 [workspace]
-edition = "2021"
 resolver = "2"
+
 
 members = [
     "voxelcraft_client",
@@ -8,4 +8,6 @@ members = [
     "voxelcraft_mod",
     "mods/test",
     "packs/test",
+    "core",
+    "libs/block_chunk"
 ]

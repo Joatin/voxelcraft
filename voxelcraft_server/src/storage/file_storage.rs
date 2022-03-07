@@ -1,6 +1,6 @@
 use crate::storage::Storage;
-use crate::chunk::ChunkPosition;
 use std::error::Error;
+use voxelcraft_core::chunk::ChunkPosition;
 
 #[derive(Debug)]
 pub struct FileStorage {

@@ -12,24 +12,25 @@ use crate::context::Context;
 pub struct Gpu {
     surface: wgpu::Surface,
     pub device: Arc<wgpu::Device>,
-    pub queue: wgpu::Queue,
+    pub queue: Arc<wgpu::Queue>,
     config: wgpu::SurfaceConfiguration,
     pub size: PhysicalSize<u32>,
     render_pipeline: wgpu::RenderPipeline,
     pub render_format: TextureFormat,
-    context: Arc<Context>,
     last_render: Instant
 }
 
 impl Gpu {
     // Creating some of the wgpu types requires async code
-    pub async fn new(context: &Arc<Context>, window: &Window) -> Self {
+    pub async fn new(window: &Window) -> Self {
+        log::info!("Creating new GPU instance");
         let size = window.inner_size();
 
         // The instance is a handle to our GPU
         // Backends::all => Vulkan + Metal + DX12 + Browser WebGPU
         let instance = wgpu::Instance::new(wgpu::Backends::all());
         let surface = unsafe { instance.create_surface(window) };
+
         let adapter = instance.request_adapter(
             &wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::HighPerformance,
@@ -71,25 +72,22 @@ impl Gpu {
             layout: Some(&render_pipeline_layout),
             vertex: wgpu::VertexState {
                 module: &shader,
-                entry_point: "vs_main", // 1.
-                buffers: &[], // 2.
+                entry_point: "vs_main",
+                buffers: &[],
             },
             primitive: wgpu::PrimitiveState {
-                topology: wgpu::PrimitiveTopology::TriangleList, // 1.
+                topology: wgpu::PrimitiveTopology::TriangleList,
                 strip_index_format: None,
-                front_face: wgpu::FrontFace::Ccw, // 2.
+                front_face: wgpu::FrontFace::Ccw,
                 cull_mode: Some(wgpu::Face::Back),
-                // Setting this to anything other than Fill requires Features::NON_FILL_POLYGON_MODE
                 polygon_mode: wgpu::PolygonMode::Fill,
-                // Requires Features::DEPTH_CLIP_CONTROL
                 unclipped_depth: false,
-                // Requires Features::CONSERVATIVE_RASTERIZATION
                 conservative: false,
             },
-            fragment: Some(wgpu::FragmentState { // 3.
+            fragment: Some(wgpu::FragmentState {
                 module: &shader,
                 entry_point: "fs_main",
-                targets: &[wgpu::ColorTargetState { // 4.
+                targets: &[wgpu::ColorTargetState {
                     format: config.format,
                     blend: Some(wgpu::BlendState::REPLACE),
                     write_mask: wgpu::ColorWrites::ALL,
@@ -109,12 +107,11 @@ impl Gpu {
         Self {
             surface,
             device: Arc::new(device),
-            queue,
+            queue: Arc::new(queue),
             config,
             size,
             render_pipeline,
             render_format,
-            context: Arc::clone(&context),
             last_render: Instant::now()
         }
     }
@@ -127,14 +124,6 @@ impl Gpu {
             self.config.height = new_size.height;
             self.surface.configure(&self.device, &self.config);
         }
-    }
-
-    pub fn input(&mut self, event: &WindowEvent) -> bool {
-        false
-    }
-
-    pub fn update(&mut self) {
-
     }
 
     pub fn start_render_pass<'a, T: FnOnce(RenderContext) -> Vec<CommandBuffer>>(&'a mut self, mut render_callback: T) -> Result<(), wgpu::SurfaceError> {
@@ -169,27 +158,27 @@ impl Gpu {
                 }],
                 depth_stencil_attachment: None,
             });
-            render_pass.set_pipeline(&self.render_pipeline); // 2.
-            render_pass.draw(0..3, 0..1); // 3.
+            render_pass.set_pipeline(&self.render_pipeline);
+            render_pass.draw(0..3, 0..1);
         }
 
         self.queue.submit(vec![encoder.finish()]);
         self.queue.submit(command_buffers);
 
 
-        {
-            let time_to_render = Instant::now().duration_since(start_draw_time);
-            self.context.set_time_to_draw_frame(time_to_render);
-        }
+        // {
+        //     let time_to_render = Instant::now().duration_since(start_draw_time);
+        //     self.context.set_time_to_draw_frame(time_to_render);
+        // }
 
         output.present();
 
-        {
-            let finish_time = Instant::now();
-            let duration_between_last_frame = finish_time.duration_since(self.last_render);
-            self.context.set_current_fps_from_duration(duration_between_last_frame);
-            self.last_render = finish_time;
-        }
+        // {
+        //     let finish_time = Instant::now();
+        //     let duration_between_last_frame = finish_time.duration_since(self.last_render);
+        //     self.context.set_current_fps_from_duration(duration_between_last_frame);
+        //     self.last_render = finish_time;
+        // }
 
 
         Ok(())

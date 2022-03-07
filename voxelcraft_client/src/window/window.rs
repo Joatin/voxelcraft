@@ -1,141 +1,170 @@
-use winit::{
-    event::*,
-    event_loop::{ControlFlow, EventLoop},
-    window::WindowBuilder,
-};
-use crate::gpu::Gpu;
 use std::error::Error;
-use crate::context::Context;
-use crate::interface::{Screen, Page, HOME_ROUTE};
-use tokio::task;
-use winit::event_loop::EventLoopWindowTarget;
-use winit::window::WindowId;
-use pollster::FutureExt;
-use tokio::sync::Mutex;
-use std::sync::Arc;
-use crate::interface::widget::{TextWidget, ButtonWidget};
+use winit::event_loop::{EventLoop, ControlFlow};
+use winit::window::{WindowBuilder, CursorIcon};
+use crate::window::EventHandler;
+use winit::event::{Event, WindowEvent, ModifiersState, DeviceEvent};
+use crate::window::convert_window_event::convert_window_event;
+use iced::mouse::Interaction;
+use winit::dpi::{LogicalPosition, PhysicalPosition};
 
 pub struct Window {
-    event_loop: EventLoop<()>,
-    window: winit::window::Window,
-    gpu: Gpu,
-    screen: Screen
+    internal_window: winit::window::Window,
+    event_loop: EventLoop<()>
 }
 
 impl Window {
-    pub async fn new(context: &Arc<Context>) -> Result<Self, Box<dyn Error>> {
+    pub fn create(title: &str) -> Result<Self, Box<dyn Error>> {
+        log::info!("Creating new window with title {}", title);
         let event_loop = EventLoop::new();
-        let window = WindowBuilder::new().with_title("Voxelcraft").build(&event_loop)?;
-        let gpu = Gpu::new(&context, &window).await;
-        let screen = Screen::new(&context, &gpu, Screen::default_pages(&gpu));
-
+        let window = WindowBuilder::new()
+            .with_title(title)
+            .build(&event_loop)?;
 
         Ok(Self {
-            event_loop,
-            window,
-            gpu,
-            screen
+            internal_window: window,
+            event_loop
         })
     }
 
-    pub async fn run(mut self, context: Arc<Context>) {
-        let event_loop = self.event_loop;
-        let window = self.window;
-        let mut gpu = self.gpu;
-        let mut screen = self.screen;
-
-        task::block_in_place(move || {
-            // Loop forever
-            event_loop.run(move |event, target, mut control_flow| {
-                match event {
-                    Event::WindowEvent {
-                        event,
-                        window_id,
-                    } if window_id == window.id() =>  {
-                        Self::on_window_event(&mut control_flow, &context, &mut gpu, &event);
-                    },
-                    Event::RedrawRequested(window_id)if window_id == window.id() => {
-                        Self::on_redraw_requested(&mut control_flow, &context, &mut gpu, &mut screen);
-                    },
-                    Event::MainEventsCleared => {
-                        // RedrawRequested will only trigger once, unless we manually
-                        // request it.
-                        window.request_redraw();
-                    }
-                    _ => {}
-                }
-            });
-        });
-
-
+    pub fn window(&self) -> &winit::window::Window {
+        &self.internal_window
     }
 
-    fn on_window_event(control_flow: &mut ControlFlow, context: &Arc<Context>, gpu: &mut Gpu, event: &WindowEvent<'_>) {
-        if !gpu.input(&event) {
-            match event {
-                WindowEvent::CloseRequested
-                | WindowEvent::KeyboardInput {
-                    input:
-                    KeyboardInput {
-                        state: ElementState::Pressed,
-                        virtual_keycode: Some(VirtualKeyCode::Escape),
-                        ..
-                    },
-                    ..
-                } => {
-                    *control_flow = ControlFlow::Exit;
-                },
-                WindowEvent::KeyboardInput {
-                    input:
-                    KeyboardInput {
-                        state: ElementState::Pressed,
-                        virtual_keycode: Some(VirtualKeyCode::F3),
-                        ..
-                    },
-                    ..
-                } => {
-                    context.toggle_debug();
-                }
-                WindowEvent::Resized(physical_size) => {
+    pub fn run<T: 'static + EventHandler>(mut self, mut event_handler: T) {
+        log::info!("Starting event loop");
 
-                    gpu.resize(*physical_size);
-                }
-                WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-                    // new_inner_size is &&mut so we have to dereference it twice
-                    gpu.resize(**new_inner_size);
-                }
+        let window = self.internal_window;
+        let mut modifiers = ModifiersState::default();
 
-                _ => {}
+        tokio::task::block_in_place(move || {
+            self.event_loop.run(move |event, _target, mut control_flow| {
+                *control_flow = ControlFlow::Poll;
+                Self::handle_event(&window, event, control_flow, &mut event_handler, &mut modifiers)
+            });
+        });
+    }
+
+    fn handle_event<T: EventHandler>(window: &winit::window::Window, event: Event<()>, mut control_flow: &mut ControlFlow, event_handler: &mut T, modifiers: &mut ModifiersState) {
+        match event {
+            Event::NewEvents(_) => {}
+            Event::WindowEvent { window_id, event } if window_id == window.id() => {
+                Self::handle_window_event(window, event, control_flow, event_handler, modifiers)
             }
+            Event::DeviceEvent { event: DeviceEvent::MouseMotion { delta }, .. } => {
+                if event_handler.should_cursor_grab() {
+                    event_handler.on_mouse_moved(delta.0, delta.1)
+                }
+            }
+            Event::UserEvent(_) => {}
+            Event::Suspended => {}
+            Event::Resumed => {}
+            Event::MainEventsCleared => {
+                window.set_cursor_grab(event_handler.should_cursor_grab()).unwrap();
+                window.set_cursor_visible(!event_handler.should_cursor_grab());
+                window.request_redraw();
+            }
+            Event::RedrawRequested(window_id) if window_id == window.id() => {
+                let (should_continue, cursor) = event_handler.on_redraw_requested();
+
+                if !should_continue {
+                    *control_flow = ControlFlow::Exit;
+                }
+
+                let win_cursor = match cursor {
+                    Interaction::Idle => {
+                        CursorIcon::Default
+                    }
+                    Interaction::Pointer => {
+                        CursorIcon::Default
+                    }
+                    Interaction::Grab => {
+                        CursorIcon::Grab
+                    }
+                    Interaction::Text => {
+                        CursorIcon::Text
+                    }
+                    Interaction::Crosshair => {
+                        CursorIcon::Crosshair
+                    }
+                    Interaction::Working => {
+                        CursorIcon::Wait
+                    }
+                    Interaction::Grabbing => {
+                        CursorIcon::Grabbing
+                    }
+                    Interaction::ResizingHorizontally => {
+                        CursorIcon::RowResize
+                    }
+                    Interaction::ResizingVertically => {
+                        CursorIcon::RowResize
+                    }
+                };
+
+                window.set_cursor_icon(
+                    win_cursor
+                )
+            }
+            _ => {}
         }
     }
 
-    fn on_redraw_requested(control_flow: &mut ControlFlow, context: &Arc<Context>, gpu: &mut Gpu, screen: &mut Screen) {
-        let res = match gpu.start_render_pass(|render_context| {
-            if let Some(game) = context.get_game() {
-                game.render(context, &render_context)
+    fn handle_window_event<T: EventHandler>(window: &winit::window::Window, event: WindowEvent, mut control_flow: &mut ControlFlow, event_handler: &mut T, modifiers: &mut ModifiersState) {
+        match &event {
+            WindowEvent::Resized(physical_size) => {
+                let scale_factor = window.scale_factor();
+                event_handler.on_resize((*physical_size).into(), scale_factor)
             }
-            let command_buffer = screen.render(context, &render_context);
+            WindowEvent::Moved(_) => {}
+            WindowEvent::CloseRequested => {
+                event_handler.on_close();
+                *control_flow = ControlFlow::Exit;
+            }
+            WindowEvent::Destroyed => {}
+            WindowEvent::DroppedFile(_) => {}
+            WindowEvent::HoveredFile(_) => {}
+            WindowEvent::HoveredFileCancelled => {}
+            WindowEvent::ReceivedCharacter(_) => {}
+            WindowEvent::Focused(gained) => {
+                if *gained {
+                    event_handler.focus_gained();
+                } else {
+                    event_handler.focus_lost();
+                }
+            }
+            WindowEvent::KeyboardInput { input, .. } => {
+                event_handler.on_keyboard_input(input.state, input.scancode)
+            }
+            WindowEvent::ModifiersChanged(new_modifiers) => {
+                *modifiers = *new_modifiers;
+            }
+            WindowEvent::CursorMoved { position, .. } => {
+                event_handler.on_cursor_moved(position.to_logical(window.scale_factor()).into());
+                if event_handler.should_cursor_grab() {
+                    window.set_cursor_position(PhysicalPosition {
+                        x: window.inner_size().width / 2,
+                        y: window.inner_size().height / 2
+                    });
+                };
+            }
+            WindowEvent::CursorEntered { .. } => {}
+            WindowEvent::CursorLeft { .. } => {}
+            WindowEvent::MouseWheel { .. } => {}
+            WindowEvent::MouseInput { .. } => {}
+            WindowEvent::TouchpadPressure { .. } => {}
+            WindowEvent::AxisMotion { .. } => {}
+            WindowEvent::Touch(_) => {}
+            WindowEvent::ScaleFactorChanged { new_inner_size, scale_factor } => {
+                event_handler.on_resize((**new_inner_size).into(), *scale_factor)
+            }
+            WindowEvent::ThemeChanged(_) => {}
+        }
 
-            vec![command_buffer]
-        }) {
-            Ok(_) => {},
-            // Reconfigure the surface if lost
-            Err(wgpu::SurfaceError::Lost) => {
-                gpu.resize(gpu.size);
-            },
-            // The system is out of memory, we should probably quit
-            Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
-            // All other errors (Outdated, Timeout) should be resolved by the next frame
-            Err(e) => {
-                eprintln!("{:?}", e);
-            },
-        };
-
-        screen.cleanup();
-
-        // screen2.lock().await.cleanup();
-
-        res
+        if let Some(e) = convert_window_event(
+            &event,
+            window.scale_factor(),
+            *modifiers,
+        ) {
+            event_handler.on_window_event(e);
+        }
     }
 }

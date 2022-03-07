@@ -1,8 +1,8 @@
-use crate::chunk::{ChunkPosition, Chunk};
 use bincode::config;
 use std::error::Error;
 use crate::storage::Storage;
 use std::sync::Arc;
+use voxelcraft_core::chunk::{ChunkPosition, Chunk};
 
 #[derive(Debug, Default, Clone)]
 pub struct CompressedChunk {

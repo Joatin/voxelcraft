@@ -1,13 +1,13 @@
-pub use self::pages::Page;
-pub use self::screen::Screen;
+pub use self::interface::Interface;
 
-mod screen;
-pub mod widget;
-mod debug_info;
-mod texture_map;
-mod pipeline_map;
-mod screen_context;
+mod interface;
+mod router;
+mod page;
+mod message;
 mod pages;
+mod router_flags;
+mod components;
 
-pub const HOME_ROUTE: &str = "HOME";
+pub use self::message::Message;
+pub use self::pages::IN_GAME_HUD_PAGE_ROUTE;
 

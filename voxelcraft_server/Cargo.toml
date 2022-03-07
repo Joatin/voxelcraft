@@ -14,3 +14,4 @@ tokio = { version = "1.17.0", features = ["rt"] }
 log = "0.4.14"
 uuid = { version = "0.8.2", features = ["serde", "v4"] }
 voxelcraft_mod = { path = "../voxelcraft_mod" }
+voxelcraft_core = { path = "../core" }

@@ -1,19 +1,20 @@
-use crate::world::world_generator::WorldGenerator;
-use crate::chunk::{Chunk, ChunkPosition};
+use voxelcraft_core::chunk::{ChunkPosition, Chunk};
+use voxelcraft_mod::world_generator::WorldGenerator;
 
 #[derive(Debug)]
-pub struct DefaultWorldGen {
+pub struct DefaultWorldGenerator {
 
 }
 
-impl DefaultWorldGen {
+impl DefaultWorldGenerator {
     pub fn new() -> Self {
         Self {}
     }
 }
 
-impl WorldGenerator for DefaultWorldGen {
+impl WorldGenerator for DefaultWorldGenerator {
     fn generate_chunk(&self, chunk_position: ChunkPosition) -> Chunk {
-        todo!()
+        let chunk = Chunk::new(chunk_position);
+        chunk
     }
 }

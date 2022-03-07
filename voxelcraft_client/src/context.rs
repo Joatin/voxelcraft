@@ -1,4 +1,3 @@
-use crate::interface::HOME_ROUTE;
 use tokio::sync::RwLock;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::time::Duration;
@@ -17,11 +16,11 @@ pub struct Context {
 impl Context {
     pub fn new() -> Self {
         Self {
-            current_route: std::sync::RwLock::new(HOME_ROUTE.to_owned()),
+            current_route: std::sync::RwLock::new("HOME".to_owned()),
             show_debug: AtomicBool::new(false),
             current_fps: std::sync::Mutex::new(0.0),
             time_to_draw_frame: std::sync::Mutex::new(Duration::default()),
-            game: Some(Arc::new(LocalGame::new()))
+            game: None
         }
     }
 

@@ -1,6 +1,6 @@
-use crate::chunk::ChunkPosition;
 use std::error::Error;
 use std::fmt::Debug;
+use voxelcraft_core::chunk::ChunkPosition;
 
 #[async_trait::async_trait]
 pub trait Storage: Send + Sync + Debug {

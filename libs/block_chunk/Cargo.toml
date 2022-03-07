@@ -1,0 +1,25 @@
+[package]
+name = "block_chunk"
+version = "0.0.1"
+edition = "2021"
+resolver = "2"
+
+[[bench]]
+name = "chunk"
+harness = false
+
+[[bench]]
+name = "meshable_chunk"
+harness = false
+
+[dependencies]
+bincode = { version = "^2.0.0-beta.3", features = ["serde"] }
+flate2 = "^1.0"
+tokio = { version = "^1.17", features = ["sync"] }
+async-trait = "^0.1"
+log = "^0.4"
+mockall = "0.11.0"
+
+[dev-dependencies]
+criterion = { version = "0.3.5", features = ["html_reports", "async_tokio"] }
+tokio = { version = "^1.17", features = ["sync", "rt", "macros"] }
