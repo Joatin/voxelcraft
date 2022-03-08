@@ -2,11 +2,15 @@ use crate::mesh::internal::handle_face::handle_face;
 use crate::mesh::{BlockDescriptor, Face};
 use crate::{BlockOffset, Chunk};
 
-pub fn handle_block<T, C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>, const SIZE: usize>(
+pub fn handle_block<
+    T: PartialEq + Clone,
+    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>,
+    const SIZE: usize,
+>(
     chunk: &Chunk<T, SIZE>,
     describe_callback: &C,
-    mesh: &mut Vec<Face<SIZE>>,
-    transparent_mesh: &mut Vec<Face<SIZE>>,
+    mesh: &mut Vec<Face<T, SIZE>>,
+    transparent_mesh: &mut Vec<Face<T, SIZE>>,
     unhandled: &mut Vec<(usize, usize, usize)>,
     x: usize,
     y: usize,
@@ -14,7 +18,8 @@ pub fn handle_block<T, C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>, const
 ) {
     let position: BlockOffset<SIZE> = (x, y, z).into();
 
-    if let Some(descriptor) = describe_callback(chunk.get(&position)) {
+    let block = chunk.get(&position);
+    if let Some(descriptor) = describe_callback(block) {
         if descriptor.is_standard_square {
             handle_face(
                 chunk,
@@ -22,6 +27,7 @@ pub fn handle_block<T, C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>, const
                 mesh,
                 transparent_mesh,
                 &descriptor,
+                block,
                 &position,
                 position.north(),
                 Face::north,
@@ -32,6 +38,7 @@ pub fn handle_block<T, C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>, const
                 mesh,
                 transparent_mesh,
                 &descriptor,
+                block,
                 &position,
                 position.south(),
                 Face::south,
@@ -42,6 +49,7 @@ pub fn handle_block<T, C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>, const
                 mesh,
                 transparent_mesh,
                 &descriptor,
+                block,
                 &position,
                 position.west(),
                 Face::west,
@@ -52,6 +60,7 @@ pub fn handle_block<T, C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>, const
                 mesh,
                 transparent_mesh,
                 &descriptor,
+                block,
                 &position,
                 position.east(),
                 Face::east,
@@ -62,6 +71,7 @@ pub fn handle_block<T, C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>, const
                 mesh,
                 transparent_mesh,
                 &descriptor,
+                block,
                 &position,
                 position.up(),
                 Face::up,
@@ -72,6 +82,7 @@ pub fn handle_block<T, C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>, const
                 mesh,
                 transparent_mesh,
                 &descriptor,
+                block,
                 &position,
                 position.down(),
                 Face::down,

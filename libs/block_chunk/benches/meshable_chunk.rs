@@ -1,3 +1,4 @@
+use block_chunk::mesh::greedy_mesh;
 use block_chunk::mesh::{BlockDescriptor, MeshableChunk};
 use block_chunk::Chunk;
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
@@ -173,9 +174,8 @@ pub fn meshable_chunk(c: &mut Criterion) {
     {
         let chunk = Chunk::<u32, 64>::default();
         c.bench_function("greedy_mesh box 64", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|_| {
+            b.iter(|| {
+                greedy_mesh(&chunk, |_| {
                     black_box(Some(BlockDescriptor {
                         is_standard_square: true,
                         is_transparent: false,
@@ -187,9 +187,8 @@ pub fn meshable_chunk(c: &mut Criterion) {
     {
         let chunk = Chunk::<u32, 32>::default();
         c.bench_function("greedy_mesh box 32", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|_| {
+            b.iter(|| {
+                greedy_mesh(&chunk, |_| {
                     black_box(Some(BlockDescriptor {
                         is_standard_square: true,
                         is_transparent: false,
@@ -201,9 +200,8 @@ pub fn meshable_chunk(c: &mut Criterion) {
     {
         let chunk = Chunk::<u32, 16>::default();
         c.bench_function("greedy_mesh box 16", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|_| {
+            b.iter(|| {
+                greedy_mesh(&chunk, |_| {
                     black_box(Some(BlockDescriptor {
                         is_standard_square: true,
                         is_transparent: false,
@@ -215,9 +213,8 @@ pub fn meshable_chunk(c: &mut Criterion) {
     {
         let chunk = Chunk::<u32, 8>::default();
         c.bench_function("greedy_mesh box 8", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|_| {
+            b.iter(|| {
+                greedy_mesh(&chunk, |_| {
                     black_box(Some(BlockDescriptor {
                         is_standard_square: true,
                         is_transparent: false,
@@ -229,9 +226,8 @@ pub fn meshable_chunk(c: &mut Criterion) {
     {
         let chunk = Chunk::<u32, 4>::default();
         c.bench_function("greedy_mesh box 4", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|_| {
+            b.iter(|| {
+                greedy_mesh(&chunk, |_| {
                     black_box(Some(BlockDescriptor {
                         is_standard_square: true,
                         is_transparent: false,
@@ -245,9 +241,8 @@ pub fn meshable_chunk(c: &mut Criterion) {
     {
         let chunk = Chunk::<u32, 64>::new_checker(0, 1);
         c.bench_function("greedy_mesh checker 64", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|val| {
+            b.iter(|| {
+                greedy_mesh(&chunk, |val| {
                     if *val == 0 {
                         None
                     } else {
@@ -263,17 +258,16 @@ pub fn meshable_chunk(c: &mut Criterion) {
     {
         let chunk = Chunk::<u32, 32>::default();
         c.bench_function("greedy_mesh checker 32", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|val| {
-                    if *val == 0 {
+            b.iter(|| {
+                greedy_mesh(&chunk, |val| {
+                    black_box(if *val == 0 {
                         None
                     } else {
                         Some(BlockDescriptor {
                             is_standard_square: true,
                             is_transparent: false,
                         })
-                    }
+                    })
                 })
             })
         });
@@ -281,9 +275,8 @@ pub fn meshable_chunk(c: &mut Criterion) {
     {
         let chunk = Chunk::<u32, 16>::default();
         c.bench_function("greedy_mesh checker 16", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|val| {
+            b.iter(|| {
+                greedy_mesh(&chunk, |val| {
                     if *val == 0 {
                         None
                     } else {
@@ -299,9 +292,8 @@ pub fn meshable_chunk(c: &mut Criterion) {
     {
         let chunk = Chunk::<u32, 8>::default();
         c.bench_function("greedy_mesh checker 8", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|val| {
+            b.iter(|| {
+                greedy_mesh(&chunk, |val| {
                     if *val == 0 {
                         None
                     } else {
@@ -317,9 +309,8 @@ pub fn meshable_chunk(c: &mut Criterion) {
     {
         let chunk = Chunk::<u32, 4>::default();
         c.bench_function("greedy_mesh checker 4", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.greedy_mesh(|val| {
+            b.iter(|| {
+                greedy_mesh(&chunk, |val| {
                     if *val == 0 {
                         None
                     } else {

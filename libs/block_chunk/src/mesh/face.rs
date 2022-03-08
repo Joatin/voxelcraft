@@ -4,7 +4,7 @@ use std::error::Error;
 
 /// Represents a block face
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
-pub struct Face<const SIZE: usize> {
+pub struct Face<T, const SIZE: usize> {
     /// The direction this face is facing
     pub direction: FaceDirection,
 
@@ -16,60 +16,68 @@ pub struct Face<const SIZE: usize> {
 
     /// The height of the face
     pub height: usize,
+
+    pub block: T,
 }
 
-impl<const SIZE: usize> Face<SIZE> {
-    pub fn north(position: &BlockOffset<SIZE>) -> Self {
+impl<T: Clone + PartialEq, const SIZE: usize> Face<T, SIZE> {
+    pub fn north(position: &BlockOffset<SIZE>, block: &T) -> Self {
         Self {
             direction: FaceDirection::North,
             position: position.clone(),
             width: 1,
             height: 1,
+            block: block.clone(),
         }
     }
 
-    pub fn south(position: &BlockOffset<SIZE>) -> Self {
+    pub fn south(position: &BlockOffset<SIZE>, block: &T) -> Self {
         Self {
             direction: FaceDirection::South,
             position: position.clone(),
             width: 1,
             height: 1,
+            block: block.clone(),
         }
     }
 
-    pub fn west(position: &BlockOffset<SIZE>) -> Self {
+    pub fn west(position: &BlockOffset<SIZE>, block: &T) -> Self {
         Self {
             direction: FaceDirection::West,
             position: position.clone(),
             width: 1,
             height: 1,
+            block: block.clone(),
         }
     }
 
-    pub fn east(position: &BlockOffset<SIZE>) -> Self {
+    pub fn east(position: &BlockOffset<SIZE>, block: &T) -> Self {
         Self {
             direction: FaceDirection::East,
             position: position.clone(),
             width: 1,
             height: 1,
+            block: block.clone(),
         }
     }
 
-    pub fn up(position: &BlockOffset<SIZE>) -> Self {
+    pub fn up(position: &BlockOffset<SIZE>, block: &T) -> Self {
         Self {
             direction: FaceDirection::Up,
             position: position.clone(),
             width: 1,
             height: 1,
+            block: block.clone(),
         }
     }
 
-    pub fn down(position: &BlockOffset<SIZE>) -> Self {
+    pub fn down(position: &BlockOffset<SIZE>, block: &T) -> Self {
         Self {
             direction: FaceDirection::Down,
             position: position.clone(),
             width: 1,
             height: 1,
+            block: block.clone(),
         }
     }
 
@@ -90,37 +98,22 @@ impl<const SIZE: usize> Face<SIZE> {
 
     #[must_use]
     pub fn can_merge_row(&self, other: &Self) -> bool {
-        self.internal_can_merge_row(other) || other.internal_can_merge_row(&self)
+        self.internal_can_merge_row(other)
     }
 
     fn internal_can_merge_row(&self, other: &Self) -> bool {
         let expected_position = match self.direction {
-            FaceDirection::North => BlockOffset::<SIZE> {
+            FaceDirection::North | FaceDirection::South => BlockOffset::<SIZE> {
                 x: self.position.x + self.width,
                 y: self.position.y,
                 z: self.position.z,
             },
-            FaceDirection::South => BlockOffset::<SIZE> {
-                x: self.position.x + self.width,
-                y: self.position.y,
-                z: self.position.z,
-            },
-            FaceDirection::West => BlockOffset::<SIZE> {
+            FaceDirection::West | FaceDirection::East => BlockOffset::<SIZE> {
                 x: self.position.x,
-                y: self.position.y + self.width,
-                z: self.position.z,
-            },
-            FaceDirection::East => BlockOffset::<SIZE> {
-                x: self.position.x,
-                y: self.position.y + self.width,
-                z: self.position.z,
-            },
-            FaceDirection::Up => BlockOffset::<SIZE> {
-                x: self.position.x + self.width,
                 y: self.position.y,
-                z: self.position.z,
+                z: self.position.z + self.width,
             },
-            FaceDirection::Down => BlockOffset::<SIZE> {
+            FaceDirection::Up | FaceDirection::Down => BlockOffset::<SIZE> {
                 x: self.position.x + self.width,
                 y: self.position.y,
                 z: self.position.z,
@@ -131,41 +124,27 @@ impl<const SIZE: usize> Face<SIZE> {
             && self.is_single_height()
             && other.position.eq(&expected_position)
             && other.direction == self.direction
+            && other.block == self.block
     }
 
     #[must_use]
     pub fn can_merge_column(&self, other: &Self) -> bool {
-        self.internal_can_merge_column(&other) || other.internal_can_merge_column(&self)
+        self.internal_can_merge_column(&other)
     }
 
     pub fn internal_can_merge_column(&self, other: &Self) -> bool {
         let expected_position = match self.direction {
-            FaceDirection::North => BlockOffset::<SIZE> {
+            FaceDirection::North | FaceDirection::South => BlockOffset::<SIZE> {
                 x: self.position.x,
                 y: self.position.y + self.height,
                 z: self.position.z,
             },
-            FaceDirection::South => BlockOffset::<SIZE> {
+            FaceDirection::West | FaceDirection::East => BlockOffset::<SIZE> {
                 x: self.position.x,
                 y: self.position.y + self.height,
                 z: self.position.z,
             },
-            FaceDirection::West => BlockOffset::<SIZE> {
-                x: self.position.x,
-                y: self.position.y,
-                z: self.position.z + self.height,
-            },
-            FaceDirection::East => BlockOffset::<SIZE> {
-                x: self.position.x,
-                y: self.position.y,
-                z: self.position.z + self.height,
-            },
-            FaceDirection::Up => BlockOffset::<SIZE> {
-                x: self.position.x,
-                y: self.position.y,
-                z: self.position.z + self.height,
-            },
-            FaceDirection::Down => BlockOffset::<SIZE> {
+            FaceDirection::Up | FaceDirection::Down => BlockOffset::<SIZE> {
                 x: self.position.x,
                 y: self.position.y,
                 z: self.position.z + self.height,
@@ -175,31 +154,24 @@ impl<const SIZE: usize> Face<SIZE> {
         other.position.eq(&expected_position)
             && self.width == other.width
             && other.direction == self.direction
+            && other.block == self.block
     }
 
-    pub fn try_merge_face_row(&mut self, other: Self) -> Result<(), Box<dyn Error>> {
+    pub fn merge_face_row(&mut self, other: Self) -> bool {
         if self.internal_can_merge_row(&other) {
             self.width += other.width;
-            Ok(())
-        } else if other.internal_can_merge_row(&self) {
-            self.position = other.position;
-            self.width += other.width;
-            Ok(())
+            true
         } else {
-            Err("This face can't be merged".into())
+            false
         }
     }
 
-    pub fn try_merge_face_column(&mut self, other: Self) -> Result<(), Box<dyn Error>> {
+    pub fn merge_face_column(&mut self, other: Self) -> bool {
         if self.internal_can_merge_column(&other) {
             self.height += other.height;
-            Ok(())
-        } else if other.internal_can_merge_column(&self) {
-            self.position = other.position;
-            self.height += other.height;
-            Ok(())
+            true
         } else {
-            Err("This face can't be merged".into())
+            false
         }
     }
 }
@@ -211,8 +183,8 @@ mod tests {
 
     #[test]
     fn can_merge_row_north_should_work() {
-        let face_1 = Face::north(&BlockOffset::<16> { x: 0, y: 0, z: 0 });
-        let face_2 = Face::north(&BlockOffset::<16> { x: 1, y: 0, z: 0 });
+        let face_1 = Face::north(&BlockOffset::<16> { x: 0, y: 0, z: 0 }, &0);
+        let face_2 = Face::north(&BlockOffset::<16> { x: 1, y: 0, z: 0 }, &0);
 
         assert!(face_1.can_merge_row(&face_2))
     }

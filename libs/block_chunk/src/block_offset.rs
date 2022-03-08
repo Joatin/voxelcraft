@@ -6,10 +6,12 @@ pub struct BlockOffset<const SIZE: usize> {
 }
 
 impl<const SIZE: usize> BlockOffset<SIZE> {
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
+    #[must_use]
     pub fn north(&self) -> Option<Self> {
         if self.z > 0 {
             Some(BlockOffset {
@@ -21,6 +23,8 @@ impl<const SIZE: usize> BlockOffset<SIZE> {
             None
         }
     }
+
+    #[must_use]
     pub fn south(&self) -> Option<Self> {
         if self.z < (SIZE - 1) {
             Some(BlockOffset {
@@ -32,6 +36,8 @@ impl<const SIZE: usize> BlockOffset<SIZE> {
             None
         }
     }
+
+    #[must_use]
     pub fn west(&self) -> Option<Self> {
         if self.x > 0 {
             Some(BlockOffset {
@@ -43,6 +49,8 @@ impl<const SIZE: usize> BlockOffset<SIZE> {
             None
         }
     }
+
+    #[must_use]
     pub fn east(&self) -> Option<Self> {
         if self.x < (SIZE - 1) {
             Some(BlockOffset {
@@ -54,6 +62,8 @@ impl<const SIZE: usize> BlockOffset<SIZE> {
             None
         }
     }
+
+    #[must_use]
     pub fn up(&self) -> Option<Self> {
         if self.y < (SIZE - 1) {
             Some(BlockOffset {
@@ -65,6 +75,8 @@ impl<const SIZE: usize> BlockOffset<SIZE> {
             None
         }
     }
+
+    #[must_use]
     pub fn down(&self) -> Option<Self> {
         if self.y > 0 {
             Some(BlockOffset {

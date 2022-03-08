@@ -21,6 +21,8 @@ impl<T: 'static + Default + Copy, const SIZE: usize> Chunk<T, SIZE> {
 }
 
 impl<T: 'static, const SIZE: usize> Chunk<T, SIZE> {
+    /// # Panics
+    #[inline]
     pub fn get(&self, position: &BlockOffset<SIZE>) -> &T {
         assert!(position.x < SIZE);
         assert!(position.y < SIZE);
@@ -29,6 +31,8 @@ impl<T: 'static, const SIZE: usize> Chunk<T, SIZE> {
         &self.blocks[position.z][position.y][position.x]
     }
 
+    /// # Panics
+    #[inline]
     pub fn set(&mut self, mut value: T, position: &BlockOffset<SIZE>) -> T {
         assert!(position.x < SIZE);
         assert!(position.y < SIZE);
@@ -48,7 +52,7 @@ impl<T: 'static + Clone + Copy, const SIZE: usize> Chunk<T, SIZE> {
         for x in 0..SIZE {
             for y in 0..SIZE {
                 for z in 0..SIZE {
-                    if z % 2 == 1 && y % 2 == 1 && x % 2 == 1 {
+                    if (z + ((y + (x % 2)) % 2)) % 2 == 1 {
                         blocks[z][y][x] = val_2.clone()
                     }
                 }
@@ -94,5 +98,20 @@ mod tests {
         chunk.set(100, &(2, 2, 2).into());
 
         assert_eq!(*chunk.get(&(2, 2, 2).into()), 100);
+    }
+
+    #[test]
+    fn checker_should_be_correct() {
+        let chunk: Chunk<_, 4> = Chunk::new_checker(0, 1);
+
+        assert_eq!(chunk.blocks[0][0][0], 0);
+        assert_eq!(chunk.blocks[1][0][0], 1);
+        assert_eq!(chunk.blocks[0][1][0], 1);
+        assert_eq!(chunk.blocks[1][1][0], 0);
+
+        assert_eq!(chunk.blocks[0][0][1], 1);
+        assert_eq!(chunk.blocks[1][0][1], 0);
+        assert_eq!(chunk.blocks[0][1][1], 0);
+        assert_eq!(chunk.blocks[1][1][1], 1);
     }
 }

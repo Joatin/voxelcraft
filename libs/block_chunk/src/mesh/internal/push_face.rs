@@ -1,10 +1,10 @@
 use crate::mesh::{BlockDescriptor, Face};
 
-pub fn push_face<const SIZE: usize>(
-    mesh: &mut Vec<Face<SIZE>>,
-    transparent_mesh: &mut Vec<Face<SIZE>>,
+pub fn push_face<T, const SIZE: usize>(
+    mesh: &mut Vec<Face<T, SIZE>>,
+    transparent_mesh: &mut Vec<Face<T, SIZE>>,
     descriptor: &BlockDescriptor,
-    face: Face<SIZE>,
+    face: Face<T, SIZE>,
 ) {
     if descriptor.is_transparent {
         transparent_mesh.push(face);
@@ -32,7 +32,7 @@ mod tests {
             &mut mesh,
             &mut transparent_mesh,
             &descriptor,
-            Face::north(&BlockOffset::<16>::default()),
+            Face::north(&BlockOffset::<16>::default(), &0),
         );
 
         assert_eq!(mesh.len(), 0);
@@ -52,7 +52,7 @@ mod tests {
             &mut mesh,
             &mut transparent_mesh,
             &descriptor,
-            Face::north(&BlockOffset::<16>::default()),
+            Face::north(&BlockOffset::<16>::default(), &0),
         );
 
         assert_eq!(mesh.len(), 1);
