@@ -133,7 +133,7 @@ pub fn greedy_mesh<
 
             for face in lines {
                 if let Some(f) = rows.iter_mut().find(|f| f.can_merge_column(&face)) {
-                    assert!(f.merge_face_column(face));
+                    f.extend_face_column(&face);
                 } else {
                     rows.push(face);
                 }
@@ -144,7 +144,7 @@ pub fn greedy_mesh<
                     .iter_mut()
                     .find(|f| f.can_merge_column(&face))
                 {
-                    assert!(f.merge_face_column(face));
+                    f.extend_face_column(&face);
                 } else {
                     rows_transparent.push(face);
                 }

@@ -157,22 +157,19 @@ impl<T: Clone + PartialEq, const SIZE: usize> Face<T, SIZE> {
             && other.block == self.block
     }
 
-    pub fn merge_face_row(&mut self, other: Self) -> bool {
-        if self.internal_can_merge_row(&other) {
-            self.width += other.width;
-            true
-        } else {
-            false
-        }
+    #[inline]
+    pub fn extend_face_row(&mut self, other: &Self) {
+        self.width += other.width;
     }
 
-    pub fn merge_face_column(&mut self, other: Self) -> bool {
-        if self.internal_can_merge_column(&other) {
-            self.height += other.height;
-            true
-        } else {
-            false
-        }
+    #[inline]
+    pub fn extend_row_by_one(&mut self) {
+        self.width += 1;
+    }
+
+    #[inline]
+    pub fn extend_face_column(&mut self, other: &Self) {
+        self.height += other.height;
     }
 }
 

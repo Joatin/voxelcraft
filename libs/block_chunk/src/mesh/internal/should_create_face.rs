@@ -29,7 +29,7 @@ mod tests {
             &Chunk::<u32, 4>::default(),
             &|_| None,
             None
-        ))
+        ));
     }
 
     #[test]
@@ -38,7 +38,7 @@ mod tests {
             &Chunk::<u32, 4>::default(),
             &|_| None,
             Some(BlockOffset::default())
-        ))
+        ));
     }
 
     #[test]
@@ -50,7 +50,7 @@ mod tests {
                 is_transparent: false
             }),
             Some(BlockOffset::default())
-        ))
+        ));
     }
 
     #[test]
@@ -62,7 +62,7 @@ mod tests {
                 is_transparent: false
             }),
             Some(BlockOffset::default())
-        ))
+        ));
     }
 
     #[test]
@@ -74,6 +74,6 @@ mod tests {
                 is_transparent: true
             }),
             Some(BlockOffset::default())
-        ))
+        ));
     }
 }

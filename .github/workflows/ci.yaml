@@ -55,8 +55,3 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-      - name: Prepare cache
-        run: cargo xtask pre-cache
-      - name: Prepare cache 2
-        if: matrix.os == 'windows-latest'
-        run: Remove-Item ./target/debug/xtask.exe

@@ -24,7 +24,7 @@ pub fn merge_face<
     if let Some(descriptor) = describe_callback(block) {
         if should_create_face(chunk, &describe_callback, neighbour_position) {
             if let Some(face) = &mut current_face {
-                assert!(face.merge_face_row(face_callback(position, block)));
+                face.extend_row_by_one();
             } else {
                 current_face.replace(face_callback(position, block));
             }
