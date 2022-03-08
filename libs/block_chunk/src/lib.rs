@@ -1,3 +1,14 @@
+#![warn(clippy::all)]
+#![warn(clippy::correctness)]
+#![warn(clippy::suspicious)]
+#![warn(clippy::style)]
+#![warn(clippy::complexity)]
+#![warn(clippy::perf)]
+#![warn(clippy::pedantic)]
+#![warn(clippy::nursery)]
+#![warn(clippy::cargo)]
+#![allow(clippy::module_name_repetitions)]
+
 pub use self::block_offset::BlockOffset;
 pub use self::chunk::Chunk;
 pub use self::chunk_cache::ChunkCache;

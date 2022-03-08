@@ -1,5 +1,3 @@
-
-
 use crate::gpu::RenderContext;
 use crate::interface::Message;
 use crate::primitives::Size;

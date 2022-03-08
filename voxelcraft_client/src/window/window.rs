@@ -2,7 +2,7 @@ use crate::window::convert_window_event::convert_window_event;
 use crate::window::EventHandler;
 use iced::mouse::Interaction;
 use std::error::Error;
-use winit::dpi::{PhysicalPosition};
+use winit::dpi::PhysicalPosition;
 use winit::event::{DeviceEvent, Event, ModifiersState, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::{CursorIcon, WindowBuilder};
@@ -35,17 +35,16 @@ impl Window {
         let mut modifiers = ModifiersState::default();
 
         tokio::task::block_in_place(move || {
-            self.event_loop
-                .run(move |event, _target, control_flow| {
-                    *control_flow = ControlFlow::Poll;
-                    Self::handle_event(
-                        &window,
-                        event,
-                        control_flow,
-                        &mut event_handler,
-                        &mut modifiers,
-                    )
-                });
+            self.event_loop.run(move |event, _target, control_flow| {
+                *control_flow = ControlFlow::Poll;
+                Self::handle_event(
+                    &window,
+                    event,
+                    control_flow,
+                    &mut event_handler,
+                    &mut modifiers,
+                )
+            });
         });
     }
 
@@ -142,10 +141,12 @@ impl Window {
             WindowEvent::CursorMoved { position, .. } => {
                 event_handler.on_cursor_moved(position.to_logical(window.scale_factor()).into());
                 if event_handler.should_cursor_grab() {
-                    window.set_cursor_position(PhysicalPosition {
-                        x: window.inner_size().width / 2,
-                        y: window.inner_size().height / 2,
-                    }).unwrap();
+                    window
+                        .set_cursor_position(PhysicalPosition {
+                            x: window.inner_size().width / 2,
+                            y: window.inner_size().height / 2,
+                        })
+                        .unwrap();
                 };
             }
             WindowEvent::CursorEntered { .. } => {}

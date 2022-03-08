@@ -1,8 +1,8 @@
 use crate::mesh::internal::handle_block::handle_block;
 use crate::mesh::{BlockDescriptor, MeshResult};
-use crate::{Chunk};
+use crate::Chunk;
 
-pub async fn fast_mesh<T, C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>, const SIZE: usize>(
+pub fn fast_mesh<T, C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>, const SIZE: usize>(
     chunk: &Chunk<T, SIZE>,
     describe_callback: C,
 ) -> MeshResult<SIZE> {

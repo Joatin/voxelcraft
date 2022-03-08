@@ -1,7 +1,7 @@
 use crate::interface::message::Message;
 
 use crate::interface::page::Page;
-use crate::interface::pages::{GAME_LOADING_PAGE_ROUTE};
+use crate::interface::pages::GAME_LOADING_PAGE_ROUTE;
 use crate::interface::router_flags::RouterFlags;
 
 use iced::{Application, Command, Element};

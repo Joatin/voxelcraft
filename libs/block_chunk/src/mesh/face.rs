@@ -1,4 +1,4 @@
-use crate::mesh::{FaceDirection};
+use crate::mesh::FaceDirection;
 use crate::BlockOffset;
 use std::error::Error;
 
@@ -73,17 +73,22 @@ impl<const SIZE: usize> Face<SIZE> {
         }
     }
 
+    #[must_use]
     pub fn is_single_block(&self) -> bool {
         self.is_single_height() && self.is_single_width()
     }
 
+    #[must_use]
     pub fn is_single_height(&self) -> bool {
         self.height == 1
     }
 
+    #[must_use]
     pub fn is_single_width(&self) -> bool {
         self.width == 1
     }
+
+    #[must_use]
     pub fn can_merge_row(&self, other: &Self) -> bool {
         self.internal_can_merge_row(other) || other.internal_can_merge_row(&self)
     }
@@ -128,6 +133,7 @@ impl<const SIZE: usize> Face<SIZE> {
             && other.direction == self.direction
     }
 
+    #[must_use]
     pub fn can_merge_column(&self, other: &Self) -> bool {
         self.internal_can_merge_column(&other) || other.internal_can_merge_column(&self)
     }
@@ -180,7 +186,7 @@ impl<const SIZE: usize> Face<SIZE> {
             self.width += other.width;
             Ok(())
         } else {
-            Err(format!("This face can't be merged").into())
+            Err("This face can't be merged".into())
         }
     }
 
@@ -193,14 +199,14 @@ impl<const SIZE: usize> Face<SIZE> {
             self.height += other.height;
             Ok(())
         } else {
-            Err(format!("This face can't be merged").into())
+            Err("This face can't be merged".into())
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::mesh::{Face};
+    use crate::mesh::Face;
     use crate::BlockOffset;
 
     #[test]

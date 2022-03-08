@@ -1,6 +1,4 @@
-use crate::mesh::{Face};
-
-
+use crate::mesh::Face;
 
 pub fn join_faces<const SIZE: usize>(faces: Vec<Face<SIZE>>) -> Vec<Face<SIZE>> {
     let rows = join_rows(faces);
@@ -8,25 +6,21 @@ pub fn join_faces<const SIZE: usize>(faces: Vec<Face<SIZE>>) -> Vec<Face<SIZE>> 
 }
 
 fn join_rows<const SIZE: usize>(faces: Vec<Face<SIZE>>) -> Vec<Face<SIZE>> {
-    let mut faces = faces.into_iter().map(|f| Some(f)).collect::<Vec<_>>();
+    let mut faces = faces.into_iter().map(Some).collect::<Vec<_>>();
     let mut rows = vec![];
 
     while let Some(base_face_opt) = faces.pop() {
         if let Some(base_face) = base_face_opt {
             let mut current_face = base_face;
             while let Some(next_face) = faces.iter_mut().find(|face| {
-                if let Some(f) = face {
-                    current_face.can_merge_row(f)
-                } else {
-                    false
-                }
+                face.as_ref().map_or(false, |f| current_face.can_merge_row(f))
             }) {
                 current_face
                     .try_merge_face_row(next_face.take().unwrap())
                     .unwrap();
             }
 
-            rows.push(current_face)
+            rows.push(current_face);
         }
     }
 
@@ -47,7 +41,7 @@ fn join_columns<const SIZE: usize>(mut faces: Vec<Face<SIZE>>) -> Vec<Face<SIZE>
                 .unwrap();
         }
 
-        columns.push(current_face)
+        columns.push(current_face);
     }
     columns
 }

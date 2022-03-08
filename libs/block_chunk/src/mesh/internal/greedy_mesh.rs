@@ -4,14 +4,14 @@ use crate::mesh::{BlockDescriptor, MeshResult};
 use crate::Chunk;
 
 pub async fn greedy_mesh<
-    T,
+    T: Sync + Send,
     C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>,
     const SIZE: usize,
 >(
     chunk: &Chunk<T, SIZE>,
     describe_callback: C,
 ) -> MeshResult<SIZE> {
-    let faces = fast_mesh(chunk, describe_callback).await;
+    let faces = fast_mesh(chunk, describe_callback);
 
     let mesh = join_faces::<SIZE>(faces.mesh);
     let transparent_mesh = join_faces::<SIZE>(faces.transparent_mesh);
@@ -26,7 +26,7 @@ pub async fn greedy_mesh<
 #[cfg(test)]
 mod tests {
     use crate::mesh::internal::greedy_mesh;
-    use crate::mesh::{BlockDescriptor};
+    use crate::mesh::BlockDescriptor;
     use crate::Chunk;
 
     #[tokio::test]

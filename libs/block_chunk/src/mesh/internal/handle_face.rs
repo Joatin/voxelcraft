@@ -21,15 +21,15 @@ pub fn handle_face<
         if let Some(neighbour_descriptor) = describe_callback(chunk.get(&neighbour_position)) {
             if !neighbour_descriptor.is_standard_square || neighbour_descriptor.is_transparent {
                 // The other block is not fully covering, push the face
-                push_face(mesh, transparent_mesh, descriptor, face_callback(position))
+                push_face(mesh, transparent_mesh, descriptor, face_callback(position));
             }
             // Otherwise do nothing
         } else {
             // Other block is AIR, we push the face
-            push_face(mesh, transparent_mesh, descriptor, face_callback(position))
+            push_face(mesh, transparent_mesh, descriptor, face_callback(position));
         }
     } else {
         // The other block is in the next chunk, lets push the face
-        push_face(mesh, transparent_mesh, descriptor, face_callback(position))
+        push_face(mesh, transparent_mesh, descriptor, face_callback(position));
     }
 }

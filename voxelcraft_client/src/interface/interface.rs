@@ -1,9 +1,7 @@
 use crate::gpu::{Gpu, RenderContext};
 use crate::interface::message::Message;
 use crate::interface::pages::get_default_pages;
-use crate::interface::pages::{
-    MAIN_PAGE_ROUTE,
-};
+use crate::interface::pages::MAIN_PAGE_ROUTE;
 use crate::interface::router::Router;
 use crate::interface::router_flags::RouterFlags;
 use crate::primitives;

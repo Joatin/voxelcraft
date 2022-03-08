@@ -20,10 +20,7 @@ use voxelcraft_server::client::Client;
 use voxelcraft_server::local::new_local_world;
 use voxelcraft_server::local::LocalClient;
 
-use wgpu::{
-    CommandBuffer, CommandEncoderDescriptor, Device, RenderPassDescriptor, RenderPipeline,
-};
-
+use wgpu::{CommandBuffer, CommandEncoderDescriptor, Device, RenderPassDescriptor, RenderPipeline};
 
 #[derive(Debug)]
 pub struct LocalGame {

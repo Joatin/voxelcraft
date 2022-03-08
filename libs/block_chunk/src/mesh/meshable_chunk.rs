@@ -1,7 +1,7 @@
 use crate::mesh::internal::fast_mesh;
 use crate::mesh::internal::greedy_mesh;
 use crate::mesh::{BlockDescriptor, MeshResult};
-use crate::{Chunk};
+use crate::Chunk;
 
 #[async_trait::async_trait]
 pub trait MeshableChunk<T, const SIZE: usize> {
@@ -24,7 +24,7 @@ impl<T: Send + Sync + 'static, const SIZE: usize> MeshableChunk<T, SIZE> for Chu
         &self,
         describe_callback: C,
     ) -> MeshResult<SIZE> {
-        fast_mesh(&self, describe_callback).await
+        fast_mesh(&self, describe_callback)
     }
 
     async fn greedy_mesh<C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>>(

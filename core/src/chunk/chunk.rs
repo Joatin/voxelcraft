@@ -1,8 +1,6 @@
 use crate::block::{BlockMap, BlockOffset};
 use crate::chunk::ChunkPosition;
 
-
-
 /// The size of a chunk along all three axis
 pub const CHUNK_SIZE: usize = 32;
 

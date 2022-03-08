@@ -1,8 +1,7 @@
-use crate::game::{Game};
+use crate::game::Game;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
-
 
 #[derive(Debug)]
 pub struct Context {

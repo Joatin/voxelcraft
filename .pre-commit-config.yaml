@@ -3,7 +3,7 @@ repos:
     hooks:
       - id: rustfmt
         name: rustfmt
-        entry: bash -c 'lines=$(pylint api/ | wc -l) && (( lines > 10)) && exit 1'
+        entry: bash -c 'cargo fmt'
         language: system
         types: [ rust ]
         pass_filenames: false

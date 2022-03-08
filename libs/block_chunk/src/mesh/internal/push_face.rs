@@ -7,9 +7,9 @@ pub fn push_face<const SIZE: usize>(
     face: Face<SIZE>,
 ) {
     if descriptor.is_transparent {
-        transparent_mesh.push(face)
+        transparent_mesh.push(face);
     } else {
-        mesh.push(face)
+        mesh.push(face);
     }
 }
 

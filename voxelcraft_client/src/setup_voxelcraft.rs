@@ -16,7 +16,8 @@ pub async fn setup_voxelcraft<T: ModPack>(_mod_pack: T) {
         Config::default(),
         TerminalMode::Mixed,
         ColorChoice::Auto,
-    ).unwrap();
+    )
+    .unwrap();
 
     let window = Window::create("Voxelcraft").unwrap();
     let gpu = Gpu::new(window.window()).await;

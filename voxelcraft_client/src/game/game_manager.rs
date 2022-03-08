@@ -10,9 +10,7 @@ use std::error::Error;
 use std::sync::Arc;
 use tokio::task::JoinHandle;
 
-use wgpu::{
-    BindGroupLayout, CommandBuffer, Device, Queue, RenderPipeline, TextureFormat,
-};
+use wgpu::{BindGroupLayout, CommandBuffer, Device, Queue, RenderPipeline, TextureFormat};
 use winit::dpi::PhysicalSize;
 
 enum GameWrapper {
