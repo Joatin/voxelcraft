@@ -8,11 +8,11 @@ use std::io::Read;
 use std::mem;
 
 #[derive(Clone, Debug, bincode::Encode, bincode::Decode)]
-pub struct Chunk<T: 'static, const SIZE: usize> {
+pub struct Chunk<T: 'static + Send + Sync, const SIZE: usize> {
     blocks: [[[T; SIZE]; SIZE]; SIZE],
 }
 
-impl<T: 'static + Default + Copy, const SIZE: usize> Chunk<T, SIZE> {
+impl<T: 'static + Send + Sync + Default + Copy, const SIZE: usize> Chunk<T, SIZE> {
     pub fn new() -> Self {
         Self {
             blocks: [[[T::default(); SIZE]; SIZE]; SIZE],
@@ -20,7 +20,7 @@ impl<T: 'static + Default + Copy, const SIZE: usize> Chunk<T, SIZE> {
     }
 }
 
-impl<T: 'static, const SIZE: usize> Chunk<T, SIZE> {
+impl<T: 'static + Send + Sync, const SIZE: usize> Chunk<T, SIZE> {
     /// # Panics
     #[inline]
     pub fn get(&self, position: &BlockOffset<SIZE>) -> &T {
@@ -46,14 +46,14 @@ impl<T: 'static, const SIZE: usize> Chunk<T, SIZE> {
     }
 }
 
-impl<T: 'static + Clone + Copy, const SIZE: usize> Chunk<T, SIZE> {
+impl<T: 'static + Send + Sync + Clone + Copy, const SIZE: usize> Chunk<T, SIZE> {
     pub fn new_checker(val_1: T, val_2: T) -> Self {
         let mut blocks = [[[val_1; SIZE]; SIZE]; SIZE];
         for x in 0..SIZE {
             for y in 0..SIZE {
                 for z in 0..SIZE {
                     if (z + ((y + (x % 2)) % 2)) % 2 == 1 {
-                        blocks[z][y][x] = val_2.clone()
+                        blocks[z][y][x] = val_2.clone();
                     }
                 }
             }
@@ -63,16 +63,16 @@ impl<T: 'static + Clone + Copy, const SIZE: usize> Chunk<T, SIZE> {
     }
 }
 
-impl<T: 'static + bincode::Encode, const SIZE: usize> Chunk<T, SIZE> {
-    pub fn compress(self) -> Result<Vec<u8>, Box<dyn Error>> {
+impl<T: 'static + Send + Sync + bincode::Encode, const SIZE: usize> Chunk<T, SIZE> {
+    pub fn compress(self) -> Result<Vec<u8>, Box<dyn Error + Send + Sync>> {
         let encoded = bincode::encode_to_vec(self, config::standard())?;
         let encoder = GzEncoder::new(encoded, Compression::best());
         Ok(encoder.finish()?)
     }
 }
 
-impl<T: 'static + bincode::Decode, const SIZE: usize> Chunk<T, SIZE> {
-    pub fn from_compressed(compressed_bytes: &[u8]) -> Result<Self, Box<dyn Error>> {
+impl<T: 'static + Send + Sync + bincode::Decode, const SIZE: usize> Chunk<T, SIZE> {
+    pub fn from_compressed(compressed_bytes: &[u8]) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let mut decoder = GzDecoder::new(compressed_bytes);
         let mut decompressed = vec![];
         decoder.read(&mut decompressed)?;
@@ -81,7 +81,7 @@ impl<T: 'static + bincode::Decode, const SIZE: usize> Chunk<T, SIZE> {
     }
 }
 
-impl<T: 'static + Default + Copy, const SIZE: usize> Default for Chunk<T, SIZE> {
+impl<T: 'static + Send + Sync + Default + Copy, const SIZE: usize> Default for Chunk<T, SIZE> {
     fn default() -> Self {
         Self::new()
     }

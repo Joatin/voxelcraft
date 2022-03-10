@@ -1,3 +1,5 @@
+//! This module contain some utility methods regarding meshing
+
 mod block_descriptor;
 mod corner;
 mod face;

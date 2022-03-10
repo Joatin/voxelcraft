@@ -5,48 +5,53 @@ use crate::Chunk;
 use std::fmt::Debug;
 
 #[async_trait::async_trait]
-pub trait MeshableChunk<T, const SIZE: usize> {
+pub trait MeshableChunk<T, TE, const SIZE: usize> {
     /// Only performs quick culling
-    async fn fast_mesh<C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>>(
+    async fn fast_mesh<C: Send + Sync + Fn(&T) -> Option<BlockDescriptor<TE>>>(
         &self,
         describe_callback: C,
-    ) -> MeshResult<T, SIZE>;
+    ) -> MeshResult<TE, SIZE>;
 
     /// Applies a greedy mesh algorithm that gives a perfect mesh, might be way slower though
-    async fn greedy_mesh<C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>>(
+    async fn greedy_mesh<C: Send + Sync + Fn(&T) -> Option<BlockDescriptor<TE>>>(
         &self,
         describe_callback: C,
-    ) -> MeshResult<T, SIZE>;
+    ) -> MeshResult<TE, SIZE>;
 }
 
 #[async_trait::async_trait]
-impl<T: Send + Sync + 'static + PartialEq + Clone + Debug, const SIZE: usize> MeshableChunk<T, SIZE>
-    for Chunk<T, SIZE>
+impl<
+        T: Send + Sync + 'static + Debug,
+        TE: 'static + Send + Sync + PartialEq + Debug + Clone,
+        const SIZE: usize,
+    > MeshableChunk<T, TE, SIZE> for Chunk<T, SIZE>
 {
-    async fn fast_mesh<C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>>(
+    async fn fast_mesh<C: Send + Sync + Fn(&T) -> Option<BlockDescriptor<TE>>>(
         &self,
         describe_callback: C,
-    ) -> MeshResult<T, SIZE> {
+    ) -> MeshResult<TE, SIZE> {
         fast_mesh(&self, describe_callback)
     }
 
-    async fn greedy_mesh<C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>>(
+    async fn greedy_mesh<C: Send + Sync + Fn(&T) -> Option<BlockDescriptor<TE>>>(
         &self,
         describe_callback: C,
-    ) -> MeshResult<T, SIZE> {
+    ) -> MeshResult<TE, SIZE> {
         greedy_mesh(&self, describe_callback)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::mesh::MeshableChunk;
+    use crate::mesh::{BlockDescriptor, MeshableChunk};
     use crate::Chunk;
 
     #[tokio::test]
     async fn fast_mesh_should_not_panic() {
-        let chunk = Chunk::<usize, 16>::default();
+        let chunk = Chunk::<usize, 4>::default();
 
-        let _res = chunk.fast_mesh(|_block_id| None).await;
+        let _res = chunk
+            .fast_mesh(|_block_id| Option::<BlockDescriptor<()>>::None)
+            .await;
     }
 }

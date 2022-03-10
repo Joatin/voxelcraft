@@ -1,10 +1,10 @@
 use crate::mesh::{BlockDescriptor, Face};
 
-pub fn push_face<T, const SIZE: usize>(
-    mesh: &mut Vec<Face<T, SIZE>>,
-    transparent_mesh: &mut Vec<Face<T, SIZE>>,
-    descriptor: &BlockDescriptor,
-    face: Face<T, SIZE>,
+pub fn push_face<TE, const SIZE: usize>(
+    mesh: &mut Vec<Face<TE, SIZE>>,
+    transparent_mesh: &mut Vec<Face<TE, SIZE>>,
+    descriptor: &BlockDescriptor<TE>,
+    face: Face<TE, SIZE>,
 ) {
     if descriptor.is_transparent {
         transparent_mesh.push(face);
@@ -15,7 +15,7 @@ pub fn push_face<T, const SIZE: usize>(
 
 #[cfg(test)]
 mod tests {
-    use crate::mesh::internal::push_face::push_face;
+    use crate::mesh::internal::fast_mesh::push_face::push_face;
     use crate::mesh::{BlockDescriptor, Face};
     use crate::BlockOffset;
 
@@ -23,16 +23,17 @@ mod tests {
     fn it_should_push_to_transparent_list_if_transparent() {
         let mut mesh = vec![];
         let mut transparent_mesh = vec![];
-        let descriptor = BlockDescriptor {
+        let descriptor = BlockDescriptor::<()> {
             is_standard_square: true,
             is_transparent: true,
+            texture_id: (),
         };
 
         push_face(
             &mut mesh,
             &mut transparent_mesh,
             &descriptor,
-            Face::north(&BlockOffset::<16>::default(), &0),
+            Face::north(&BlockOffset::<16>::default(), &(), false),
         );
 
         assert_eq!(mesh.len(), 0);
@@ -43,16 +44,17 @@ mod tests {
     fn it_should_push_to_mesh_vec_if_not_transparent() {
         let mut mesh = vec![];
         let mut transparent_mesh = vec![];
-        let descriptor = BlockDescriptor {
+        let descriptor = BlockDescriptor::<()> {
             is_standard_square: true,
             is_transparent: false,
+            texture_id: (),
         };
 
         push_face(
             &mut mesh,
             &mut transparent_mesh,
             &descriptor,
-            Face::north(&BlockOffset::<16>::default(), &0),
+            Face::north(&BlockOffset::<16>::default(), &(), false),
         );
 
         assert_eq!(mesh.len(), 1);

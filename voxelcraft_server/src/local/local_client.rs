@@ -5,8 +5,9 @@ use std::error::Error;
 use std::sync::Arc;
 use tokio::sync::broadcast;
 
+use crate::Chunk;
 use uuid::Uuid;
-use voxelcraft_core::chunk::{Chunk, ChunkPosition};
+use voxelcraft_core::chunk::ChunkPosition;
 use voxelcraft_core::entity::EntityPosition;
 
 #[derive(Debug)]
@@ -49,6 +50,6 @@ impl Client for LocalClient {
         &self,
         chunk_position: ChunkPosition,
     ) -> Result<Arc<Chunk>, Box<dyn Error + Send + Sync>> {
-        self.world.get_chunk(chunk_position).await
+        todo!()
     }
 }

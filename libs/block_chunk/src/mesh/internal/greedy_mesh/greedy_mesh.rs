@@ -1,34 +1,34 @@
-use crate::mesh::internal::fast_mesh;
-use crate::mesh::internal::merge_face::merge_face;
+use crate::mesh::internal::greedy_mesh::merge_face::merge_face;
 use crate::mesh::{BlockDescriptor, Face, MeshResult};
 use crate::{BlockOffset, Chunk};
 use std::fmt::Debug;
 
 pub fn greedy_mesh<
-    T: Sync + Send + Clone + PartialEq + Debug,
-    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>,
+    T: Sync + Send + Debug,
+    TE: Sync + Send + Clone + PartialEq + Debug,
+    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor<TE>>,
     const SIZE: usize,
 >(
     chunk: &Chunk<T, SIZE>,
     describe_callback: C,
-) -> MeshResult<T, SIZE> {
+) -> MeshResult<TE, SIZE> {
     let mut mesh = vec![];
     let mut transparent_mesh = vec![];
     let mut unhandled = vec![];
 
     for x in 0..SIZE {
-        let mut rows: Vec<Face<T, SIZE>> = vec![];
-        let mut rows_transparent: Vec<Face<T, SIZE>> = vec![];
+        let mut rows = vec![];
+        let mut rows_transparent = vec![];
         for y in 0..SIZE {
-            let mut lines: Vec<Face<T, SIZE>> = vec![];
-            let mut lines_transparent: Vec<Face<T, SIZE>> = vec![];
+            let mut lines = vec![];
+            let mut lines_transparent = vec![];
 
-            let mut current_north_face: Option<Face<T, SIZE>> = None;
-            let mut current_south_face: Option<Face<T, SIZE>> = None;
-            let mut current_west_face: Option<Face<T, SIZE>> = None;
-            let mut current_east_face: Option<Face<T, SIZE>> = None;
-            let mut current_up_face: Option<Face<T, SIZE>> = None;
-            let mut current_down_face: Option<Face<T, SIZE>> = None;
+            let mut current_north_face = None;
+            let mut current_south_face = None;
+            let mut current_west_face = None;
+            let mut current_east_face = None;
+            let mut current_up_face = None;
+            let mut current_down_face = None;
 
             for z in 0..SIZE {
                 {
@@ -132,7 +132,10 @@ pub fn greedy_mesh<
             }
 
             for face in lines {
-                if let Some(f) = rows.iter_mut().find(|f| f.can_merge_column(&face)) {
+                if let Some(f) = rows
+                    .iter_mut()
+                    .find(|f: &&mut Face<TE, SIZE>| f.can_merge_column(&face))
+                {
                     f.extend_face_column(&face);
                 } else {
                     rows.push(face);
@@ -142,7 +145,7 @@ pub fn greedy_mesh<
             for face in lines_transparent {
                 if let Some(f) = rows_transparent
                     .iter_mut()
-                    .find(|f| f.can_merge_column(&face))
+                    .find(|f: &&mut Face<TE, SIZE>| f.can_merge_column(&face))
                 {
                     f.extend_face_column(&face);
                 } else {
@@ -173,9 +176,10 @@ mod tests {
         let chunk = Chunk::<usize, 8>::default();
 
         let result = greedy_mesh(&chunk, |_| {
-            Some(BlockDescriptor {
+            Some(BlockDescriptor::<()> {
                 is_standard_square: true,
                 is_transparent: false,
+                texture_id: (),
             })
         });
 
@@ -192,9 +196,10 @@ mod tests {
             if *val == 0 {
                 None
             } else {
-                Some(BlockDescriptor {
+                Some(BlockDescriptor::<()> {
                     is_standard_square: true,
                     is_transparent: false,
+                    texture_id: (),
                 })
             }
         });

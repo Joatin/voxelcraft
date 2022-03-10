@@ -1,8 +1,9 @@
 use crate::event::WorldEvent;
+use crate::Chunk;
 use std::error::Error;
 use std::sync::Arc;
 use tokio::sync::broadcast;
-use voxelcraft_core::chunk::{Chunk, ChunkPosition};
+use voxelcraft_core::chunk::ChunkPosition;
 use voxelcraft_core::entity::EntityPosition;
 
 #[async_trait::async_trait]

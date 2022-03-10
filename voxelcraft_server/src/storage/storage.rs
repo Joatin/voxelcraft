@@ -1,9 +1,10 @@
+use block_chunk::ChunkStorage;
 use std::error::Error;
 use std::fmt::Debug;
 use voxelcraft_core::chunk::ChunkPosition;
 
 #[async_trait::async_trait]
-pub trait Storage: Send + Sync + Debug {
+pub trait Storage: ChunkStorage<ChunkPosition> + Send + Sync + Debug {
     async fn save_chunk_blocks(
         &self,
         encoded_blocks: &[u8],

@@ -2512,6 +2512,7 @@ name = "voxelcraft_client"
 version = "0.0.1"
 dependencies = [
  "async-trait",
+ "block_chunk",
  "bytemuck",
  "cgmath",
  "env_logger",
@@ -2543,6 +2544,7 @@ name = "voxelcraft_core"
 version = "0.0.1"
 dependencies = [
  "bincode",
+ "block_chunk",
  "criterion",
  "flate2",
  "uuid",
@@ -2553,6 +2555,7 @@ name = "voxelcraft_mod"
 version = "0.0.1"
 dependencies = [
  "async-trait",
+ "block_chunk",
  "futures",
  "uuid",
  "voxelcraft_core",
@@ -2564,6 +2567,7 @@ version = "0.0.1"
 dependencies = [
  "async-trait",
  "bincode",
+ "block_chunk",
  "flate2",
  "log",
  "serde",

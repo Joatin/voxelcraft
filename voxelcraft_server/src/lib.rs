@@ -8,3 +8,5 @@ pub mod local;
 mod remote;
 mod storage;
 mod world;
+
+pub use self::chunk::Chunk;

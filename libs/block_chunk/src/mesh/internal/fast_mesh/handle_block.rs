@@ -1,16 +1,17 @@
-use crate::mesh::internal::handle_face::handle_face;
+use crate::mesh::internal::fast_mesh::handle_face::handle_face;
 use crate::mesh::{BlockDescriptor, Face};
 use crate::{BlockOffset, Chunk};
 
 pub fn handle_block<
-    T: PartialEq + Clone,
-    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>,
+    T: Send + Sync,
+    TE: PartialEq + Clone,
+    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor<TE>>,
     const SIZE: usize,
 >(
     chunk: &Chunk<T, SIZE>,
     describe_callback: &C,
-    mesh: &mut Vec<Face<T, SIZE>>,
-    transparent_mesh: &mut Vec<Face<T, SIZE>>,
+    mesh: &mut Vec<Face<TE, SIZE>>,
+    transparent_mesh: &mut Vec<Face<TE, SIZE>>,
     unhandled: &mut Vec<(usize, usize, usize)>,
     x: usize,
     y: usize,
@@ -27,7 +28,6 @@ pub fn handle_block<
                 mesh,
                 transparent_mesh,
                 &descriptor,
-                block,
                 &position,
                 position.north(),
                 Face::north,
@@ -38,7 +38,6 @@ pub fn handle_block<
                 mesh,
                 transparent_mesh,
                 &descriptor,
-                block,
                 &position,
                 position.south(),
                 Face::south,
@@ -49,7 +48,6 @@ pub fn handle_block<
                 mesh,
                 transparent_mesh,
                 &descriptor,
-                block,
                 &position,
                 position.west(),
                 Face::west,
@@ -60,7 +58,6 @@ pub fn handle_block<
                 mesh,
                 transparent_mesh,
                 &descriptor,
-                block,
                 &position,
                 position.east(),
                 Face::east,
@@ -71,7 +68,6 @@ pub fn handle_block<
                 mesh,
                 transparent_mesh,
                 &descriptor,
-                block,
                 &position,
                 position.up(),
                 Face::up,
@@ -82,7 +78,6 @@ pub fn handle_block<
                 mesh,
                 transparent_mesh,
                 &descriptor,
-                block,
                 &position,
                 position.down(),
                 Face::down,

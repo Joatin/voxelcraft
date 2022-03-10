@@ -29,6 +29,7 @@ uuid = "0.8"
 voxelcraft_core = { path = "../core" }
 smallvec = "1.8.0"
 num_cpus = "1.13.1"
+block_chunk = { path = "../libs/block_chunk" }
 
 [dev-dependencies]
 packs_test = {path = "../packs/test"}

@@ -1,10 +1,9 @@
 use crate::mesh::FaceDirection;
 use crate::BlockOffset;
-use std::error::Error;
 
 /// Represents a block face
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
-pub struct Face<T, const SIZE: usize> {
+pub struct Face<TE, const SIZE: usize> {
     /// The direction this face is facing
     pub direction: FaceDirection,
 
@@ -17,67 +16,75 @@ pub struct Face<T, const SIZE: usize> {
     /// The height of the face
     pub height: usize,
 
-    pub block: T,
+    pub texture: TE,
+
+    pub is_transparent: bool,
 }
 
-impl<T: Clone + PartialEq, const SIZE: usize> Face<T, SIZE> {
-    pub fn north(position: &BlockOffset<SIZE>, block: &T) -> Self {
+impl<TE: Clone + PartialEq, const SIZE: usize> Face<TE, SIZE> {
+    pub fn north(position: &BlockOffset<SIZE>, texture: &TE, is_transparent: bool) -> Self {
         Self {
             direction: FaceDirection::North,
             position: position.clone(),
             width: 1,
             height: 1,
-            block: block.clone(),
+            texture: texture.clone(),
+            is_transparent,
         }
     }
 
-    pub fn south(position: &BlockOffset<SIZE>, block: &T) -> Self {
+    pub fn south(position: &BlockOffset<SIZE>, texture: &TE, is_transparent: bool) -> Self {
         Self {
             direction: FaceDirection::South,
             position: position.clone(),
             width: 1,
             height: 1,
-            block: block.clone(),
+            texture: texture.clone(),
+            is_transparent,
         }
     }
 
-    pub fn west(position: &BlockOffset<SIZE>, block: &T) -> Self {
+    pub fn west(position: &BlockOffset<SIZE>, texture: &TE, is_transparent: bool) -> Self {
         Self {
             direction: FaceDirection::West,
             position: position.clone(),
             width: 1,
             height: 1,
-            block: block.clone(),
+            texture: texture.clone(),
+            is_transparent,
         }
     }
 
-    pub fn east(position: &BlockOffset<SIZE>, block: &T) -> Self {
+    pub fn east(position: &BlockOffset<SIZE>, texture: &TE, is_transparent: bool) -> Self {
         Self {
             direction: FaceDirection::East,
             position: position.clone(),
             width: 1,
             height: 1,
-            block: block.clone(),
+            texture: texture.clone(),
+            is_transparent,
         }
     }
 
-    pub fn up(position: &BlockOffset<SIZE>, block: &T) -> Self {
+    pub fn up(position: &BlockOffset<SIZE>, texture: &TE, is_transparent: bool) -> Self {
         Self {
             direction: FaceDirection::Up,
             position: position.clone(),
             width: 1,
             height: 1,
-            block: block.clone(),
+            texture: texture.clone(),
+            is_transparent,
         }
     }
 
-    pub fn down(position: &BlockOffset<SIZE>, block: &T) -> Self {
+    pub fn down(position: &BlockOffset<SIZE>, texture: &TE, is_transparent: bool) -> Self {
         Self {
             direction: FaceDirection::Down,
             position: position.clone(),
             width: 1,
             height: 1,
-            block: block.clone(),
+            texture: texture.clone(),
+            is_transparent,
         }
     }
 
@@ -124,7 +131,7 @@ impl<T: Clone + PartialEq, const SIZE: usize> Face<T, SIZE> {
             && self.is_single_height()
             && other.position.eq(&expected_position)
             && other.direction == self.direction
-            && other.block == self.block
+            && other.texture == self.texture
     }
 
     #[must_use]
@@ -154,7 +161,7 @@ impl<T: Clone + PartialEq, const SIZE: usize> Face<T, SIZE> {
         other.position.eq(&expected_position)
             && self.width == other.width
             && other.direction == self.direction
-            && other.block == self.block
+            && other.texture == self.texture
     }
 
     #[inline]
@@ -180,8 +187,8 @@ mod tests {
 
     #[test]
     fn can_merge_row_north_should_work() {
-        let face_1 = Face::north(&BlockOffset::<16> { x: 0, y: 0, z: 0 }, &0);
-        let face_2 = Face::north(&BlockOffset::<16> { x: 1, y: 0, z: 0 }, &0);
+        let face_1 = Face::north(&BlockOffset::<16> { x: 0, y: 0, z: 0 }, &0, false);
+        let face_2 = Face::north(&BlockOffset::<16> { x: 1, y: 0, z: 0 }, &0, false);
 
         assert!(face_1.can_merge_row(&face_2))
     }

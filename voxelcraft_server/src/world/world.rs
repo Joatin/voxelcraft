@@ -1,9 +1,11 @@
 use crate::block::Block;
-use crate::chunk::{ChunkMap, CompressedChunk};
 use crate::dimension::DefaultDimension;
 use crate::entity::Player;
 use crate::event::WorldEvent;
-use crate::storage::Storage;
+use crate::storage::{FileStorage, Storage};
+use crate::world::DefaultWorldGenerator;
+use crate::Chunk;
+use block_chunk::ChunkCache;
 use std::collections::HashMap;
 use std::error::Error;
 use std::sync::Arc;
@@ -14,14 +16,14 @@ use tokio::sync::mpsc::Sender;
 use tokio::sync::{broadcast, Mutex, RwLock};
 use tokio::time::interval;
 use uuid::Uuid;
-use voxelcraft_core::chunk::{Chunk, ChunkPosition};
+use voxelcraft_core::chunk::ChunkPosition;
 use voxelcraft_core::entity::{EntityOffset, EntityPosition};
 use voxelcraft_mod::{Dimension, Entity, DEFAULT_DIMENSION_ID};
 
 #[derive(Debug)]
 pub struct World {
     storage: Arc<dyn Storage>,
-    chunk_map: ChunkMap,
+    chunk_cache: Arc<ChunkCache<ChunkPosition, u32, 32>>,
     name: String,
     players: Mutex<HashMap<Uuid, Player>>,
     dimensions: Arc<RwLock<HashMap<Uuid, Arc<dyn Dimension>>>>,
@@ -36,8 +38,13 @@ const CHANNEL_SIZE: usize = 10_000;
 impl World {
     pub fn new<S: Storage + 'static>(storage: S) -> Self {
         let dimensions = Self::construct_dimensions();
-        let chunk_map = ChunkMap::new(&dimensions);
         let block_list = Arc::new(HashMap::new());
+        let chunk_cache = Arc::new(ChunkCache::new(
+            1000,
+            1000,
+            Arc::new(FileStorage::new()),
+            DefaultWorldGenerator::new(),
+        ));
 
         let (incoming_events_sender, incoming_events_receiver) = channel(CHANNEL_SIZE);
         let (outgoing_events_sender, _) = broadcast::channel(CHANNEL_SIZE);
@@ -46,7 +53,7 @@ impl World {
 
         Self {
             storage: Arc::new(storage),
-            chunk_map,
+            chunk_cache,
             name: "".to_string(),
             players: Mutex::new(HashMap::new()),
             dimensions,
@@ -82,7 +89,7 @@ impl World {
 
         log::debug!("Updating {} chunks", chunks_to_update.len());
         for position in chunks_to_update {
-            let _chunk = self.chunk_map.get(&position).await?;
+            // let _chunk = self.chunk_map.get(&position).await?;
         }
 
         Ok(())
@@ -113,15 +120,15 @@ impl World {
         self.outgoing_events_sender.subscribe()
     }
 
-    pub async fn get_chunk(
+    pub async fn get_chunk<C: Send + Sync + FnOnce(&Chunk) -> R, R>(
         &self,
         chunk_position: ChunkPosition,
-    ) -> Result<Arc<Chunk>, Box<dyn Error + Send + Sync>> {
-        self.chunk_map.get(&chunk_position).await
-    }
-
-    pub fn get_compressed_chunk(&self, _chunk_position: ChunkPosition) -> &CompressedChunk {
-        todo!()
+        callback: C,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        self.chunk_cache
+            .borrow_chunk(&chunk_position, callback)
+            .await?;
+        Ok(())
     }
 
     pub async fn get_player_position(&self, player_id: Uuid) -> Option<EntityPosition> {

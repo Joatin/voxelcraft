@@ -1,280 +1,62 @@
+use block_chunk::mesh::fast_mesh;
 use block_chunk::mesh::greedy_mesh;
-use block_chunk::mesh::{BlockDescriptor, MeshableChunk};
+use block_chunk::mesh::BlockDescriptor;
 use block_chunk::Chunk;
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use tokio::runtime::Runtime;
+use criterion::{criterion_group, criterion_main, Criterion};
 
-pub fn meshable_chunk(c: &mut Criterion) {
-    // FAST MESH BOX
+fn benchmark_set<const SIZE: usize>(c: &mut Criterion) {
     {
-        let chunk = Chunk::<u32, 64>::default();
-        c.bench_function("fast_mesh box 64", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|_| {
-                    black_box(Some(BlockDescriptor {
-                        is_standard_square: true,
-                        is_transparent: false,
-                    }))
-                })
-            })
-        });
-    }
-    {
-        let chunk = Chunk::<u32, 32>::default();
-        c.bench_function("fast_mesh box 32", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|_| {
-                    black_box(Some(BlockDescriptor {
-                        is_standard_square: true,
-                        is_transparent: false,
-                    }))
-                })
-            })
-        });
-    }
-    {
-        let chunk = Chunk::<u32, 16>::default();
-        c.bench_function("fast_mesh box 16", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|_| {
-                    black_box(Some(BlockDescriptor {
-                        is_standard_square: true,
-                        is_transparent: false,
-                    }))
-                })
-            })
-        });
-    }
-    {
-        let chunk = Chunk::<u32, 8>::default();
-        c.bench_function("fast_mesh box 8", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|_| {
-                    black_box(Some(BlockDescriptor {
-                        is_standard_square: true,
-                        is_transparent: false,
-                    }))
-                })
-            })
-        });
-    }
-    {
-        let chunk = Chunk::<u32, 4>::default();
-        c.bench_function("fast_mesh box 4", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|_| {
-                    black_box(Some(BlockDescriptor {
-                        is_standard_square: true,
-                        is_transparent: false,
-                    }))
-                })
-            })
-        });
-    }
-
-    // FAST MESH CHECKER
-    {
-        let chunk = Chunk::<u32, 64>::new_checker(0, 1);
-        c.bench_function("fast_mesh checker 64", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|val| {
-                    if *val == 0 {
-                        None
-                    } else {
-                        Some(BlockDescriptor {
-                            is_standard_square: true,
-                            is_transparent: false,
-                        })
-                    }
-                })
-            })
-        });
-    }
-    {
-        let chunk = Chunk::<u32, 32>::default();
-        c.bench_function("fast_mesh checker 32", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|val| {
-                    if *val == 0 {
-                        None
-                    } else {
-                        Some(BlockDescriptor {
-                            is_standard_square: true,
-                            is_transparent: false,
-                        })
-                    }
-                })
-            })
-        });
-    }
-    {
-        let chunk = Chunk::<u32, 16>::default();
-        c.bench_function("fast_mesh checker 16", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|val| {
-                    if *val == 0 {
-                        None
-                    } else {
-                        Some(BlockDescriptor {
-                            is_standard_square: true,
-                            is_transparent: false,
-                        })
-                    }
-                })
-            })
-        });
-    }
-    {
-        let chunk = Chunk::<u32, 8>::default();
-        c.bench_function("fast_mesh checker 8", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|val| {
-                    if *val == 0 {
-                        None
-                    } else {
-                        Some(BlockDescriptor {
-                            is_standard_square: true,
-                            is_transparent: false,
-                        })
-                    }
-                })
-            })
-        });
-    }
-    {
-        let chunk = Chunk::<u32, 4>::default();
-        c.bench_function("fast_mesh checker 4", |b| {
-            let runtime = Runtime::new().unwrap();
-            b.to_async(runtime).iter(|| {
-                chunk.fast_mesh(|val| {
-                    if *val == 0 {
-                        None
-                    } else {
-                        Some(BlockDescriptor {
-                            is_standard_square: true,
-                            is_transparent: false,
-                        })
-                    }
-                })
-            })
-        });
-    }
-
-    // GREEDY MESH
-
-    {
-        let chunk = Chunk::<u32, 64>::default();
-        c.bench_function("greedy_mesh box 64", |b| {
+        let chunk = Chunk::<u32, SIZE>::default();
+        c.bench_function(&format!("chunk_{} fast_mesh box", SIZE), |b| {
             b.iter(|| {
-                greedy_mesh(&chunk, |_| {
-                    black_box(Some(BlockDescriptor {
+                fast_mesh(&chunk, |_| {
+                    Some(BlockDescriptor {
                         is_standard_square: true,
                         is_transparent: false,
-                    }))
-                })
-            })
-        });
-    }
-    {
-        let chunk = Chunk::<u32, 32>::default();
-        c.bench_function("greedy_mesh box 32", |b| {
-            b.iter(|| {
-                greedy_mesh(&chunk, |_| {
-                    black_box(Some(BlockDescriptor {
-                        is_standard_square: true,
-                        is_transparent: false,
-                    }))
-                })
-            })
-        });
-    }
-    {
-        let chunk = Chunk::<u32, 16>::default();
-        c.bench_function("greedy_mesh box 16", |b| {
-            b.iter(|| {
-                greedy_mesh(&chunk, |_| {
-                    black_box(Some(BlockDescriptor {
-                        is_standard_square: true,
-                        is_transparent: false,
-                    }))
-                })
-            })
-        });
-    }
-    {
-        let chunk = Chunk::<u32, 8>::default();
-        c.bench_function("greedy_mesh box 8", |b| {
-            b.iter(|| {
-                greedy_mesh(&chunk, |_| {
-                    black_box(Some(BlockDescriptor {
-                        is_standard_square: true,
-                        is_transparent: false,
-                    }))
-                })
-            })
-        });
-    }
-    {
-        let chunk = Chunk::<u32, 4>::default();
-        c.bench_function("greedy_mesh box 4", |b| {
-            b.iter(|| {
-                greedy_mesh(&chunk, |_| {
-                    black_box(Some(BlockDescriptor {
-                        is_standard_square: true,
-                        is_transparent: false,
-                    }))
-                })
-            })
-        });
-    }
-
-    // GREEDY MESH CHECKER
-    {
-        let chunk = Chunk::<u32, 64>::new_checker(0, 1);
-        c.bench_function("greedy_mesh checker 64", |b| {
-            b.iter(|| {
-                greedy_mesh(&chunk, |val| {
-                    if *val == 0 {
-                        None
-                    } else {
-                        Some(BlockDescriptor {
-                            is_standard_square: true,
-                            is_transparent: false,
-                        })
-                    }
-                })
-            })
-        });
-    }
-    {
-        let chunk = Chunk::<u32, 32>::default();
-        c.bench_function("greedy_mesh checker 32", |b| {
-            b.iter(|| {
-                greedy_mesh(&chunk, |val| {
-                    black_box(if *val == 0 {
-                        None
-                    } else {
-                        Some(BlockDescriptor {
-                            is_standard_square: true,
-                            is_transparent: false,
-                        })
+                        texture_id: (),
                     })
                 })
             })
         });
     }
+
     {
-        let chunk = Chunk::<u32, 16>::default();
-        c.bench_function("greedy_mesh checker 16", |b| {
+        let chunk = Chunk::<u32, SIZE>::new_checker(0, 1);
+        c.bench_function(&format!("chunk_{} fast_mesh checker", SIZE), |b| {
+            b.iter(|| {
+                fast_mesh(&chunk, |val| {
+                    if *val == 0 {
+                        None
+                    } else {
+                        Some(BlockDescriptor {
+                            is_standard_square: true,
+                            is_transparent: false,
+                            texture_id: (),
+                        })
+                    }
+                })
+            })
+        });
+    }
+
+    {
+        let chunk = Chunk::<u32, SIZE>::default();
+        c.bench_function(&format!("chunk_{} greedy_mesh box", SIZE), |b| {
+            b.iter(|| {
+                greedy_mesh(&chunk, |_| {
+                    Some(BlockDescriptor {
+                        is_standard_square: true,
+                        is_transparent: false,
+                        texture_id: (),
+                    })
+                })
+            })
+        });
+    }
+
+    {
+        let chunk = Chunk::<u32, SIZE>::new_checker(0, 1);
+        c.bench_function(&format!("chunk_{} greedy_mesh checker", SIZE), |b| {
             b.iter(|| {
                 greedy_mesh(&chunk, |val| {
                     if *val == 0 {
@@ -283,46 +65,21 @@ pub fn meshable_chunk(c: &mut Criterion) {
                         Some(BlockDescriptor {
                             is_standard_square: true,
                             is_transparent: false,
+                            texture_id: (),
                         })
                     }
                 })
             })
         });
     }
-    {
-        let chunk = Chunk::<u32, 8>::default();
-        c.bench_function("greedy_mesh checker 8", |b| {
-            b.iter(|| {
-                greedy_mesh(&chunk, |val| {
-                    if *val == 0 {
-                        None
-                    } else {
-                        Some(BlockDescriptor {
-                            is_standard_square: true,
-                            is_transparent: false,
-                        })
-                    }
-                })
-            })
-        });
-    }
-    {
-        let chunk = Chunk::<u32, 4>::default();
-        c.bench_function("greedy_mesh checker 4", |b| {
-            b.iter(|| {
-                greedy_mesh(&chunk, |val| {
-                    if *val == 0 {
-                        None
-                    } else {
-                        Some(BlockDescriptor {
-                            is_standard_square: true,
-                            is_transparent: false,
-                        })
-                    }
-                })
-            })
-        });
-    }
+}
+
+pub fn meshable_chunk(c: &mut Criterion) {
+    benchmark_set::<64>(c);
+    benchmark_set::<32>(c);
+    benchmark_set::<16>(c);
+    benchmark_set::<8>(c);
+    benchmark_set::<4>(c);
 }
 
 criterion_group!(benches, meshable_chunk);

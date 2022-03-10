@@ -1,19 +1,19 @@
-use crate::mesh::internal::push_face::push_face;
+use crate::mesh::internal::fast_mesh::push_face::push_face;
 use crate::mesh::{BlockDescriptor, Face};
 use crate::{BlockOffset, Chunk};
 
 pub fn handle_face<
-    T,
-    FC: FnOnce(&BlockOffset<SIZE>, &T) -> Face<T, SIZE>,
-    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>,
+    T: Send + Sync,
+    TE,
+    FC: FnOnce(&BlockOffset<SIZE>, &TE, bool) -> Face<TE, SIZE>,
+    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor<TE>>,
     const SIZE: usize,
 >(
     chunk: &Chunk<T, SIZE>,
     describe_callback: &C,
-    mesh: &mut Vec<Face<T, SIZE>>,
-    transparent_mesh: &mut Vec<Face<T, SIZE>>,
-    descriptor: &BlockDescriptor,
-    block: &T,
+    mesh: &mut Vec<Face<TE, SIZE>>,
+    transparent_mesh: &mut Vec<Face<TE, SIZE>>,
+    descriptor: &BlockDescriptor<TE>,
     position: &BlockOffset<SIZE>,
     neighbour_position: Option<BlockOffset<SIZE>>,
     face_callback: FC,
@@ -26,7 +26,7 @@ pub fn handle_face<
                     mesh,
                     transparent_mesh,
                     descriptor,
-                    face_callback(position, block),
+                    face_callback(position, &descriptor.texture_id, descriptor.is_transparent),
                 );
             }
             // Otherwise do nothing
@@ -36,7 +36,7 @@ pub fn handle_face<
                 mesh,
                 transparent_mesh,
                 descriptor,
-                face_callback(position, block),
+                face_callback(position, &descriptor.texture_id, descriptor.is_transparent),
             );
         }
     } else {
@@ -45,7 +45,7 @@ pub fn handle_face<
             mesh,
             transparent_mesh,
             descriptor,
-            face_callback(position, block),
+            face_callback(position, &descriptor.texture_id, descriptor.is_transparent),
         );
     }
 }

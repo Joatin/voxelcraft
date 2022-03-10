@@ -1,4 +1,3 @@
-use crate::world_generator::WorldGenerator;
 use std::fmt::Debug;
 
 use uuid::Uuid;
@@ -9,5 +8,5 @@ pub const DEFAULT_DIMENSION_ID: Uuid = Uuid::from_u128(0x9cb4cf41_5c3d_4647_83b0
 pub trait Dimension: Send + Sync + Debug {
     fn id(&self) -> Uuid;
     fn name(&self) -> &str;
-    fn world_generator(&self) -> &dyn WorldGenerator;
+    // fn world_generator(&self) -> &dyn WorldGenerator;
 }

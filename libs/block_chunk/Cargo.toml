@@ -12,6 +12,10 @@ harness = false
 name = "meshable_chunk"
 harness = false
 
+[features]
+default = ["mesh"]
+mesh = []
+
 [dependencies]
 bincode = { version = "^2.0.0-beta.3", features = ["serde"] }
 flate2 = "^1.0"

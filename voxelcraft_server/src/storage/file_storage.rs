@@ -1,4 +1,5 @@
 use crate::storage::Storage;
+use block_chunk::ChunkStorage;
 use std::error::Error;
 use voxelcraft_core::chunk::ChunkPosition;
 
@@ -8,6 +9,24 @@ pub struct FileStorage {}
 impl FileStorage {
     pub fn new() -> Self {
         Self {}
+    }
+}
+
+#[async_trait::async_trait]
+impl ChunkStorage<ChunkPosition> for FileStorage {
+    async fn store(
+        &self,
+        position: &ChunkPosition,
+        bytes: Vec<u8>,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        todo!()
+    }
+
+    async fn load(
+        &self,
+        position: &ChunkPosition,
+    ) -> Result<Option<Vec<u8>>, Box<dyn Error + Send + Sync>> {
+        todo!()
     }
 }
 

@@ -1,8 +1,8 @@
 use crate::mesh::Face;
 
 #[derive(Debug, Clone)]
-pub struct MeshResult<T, const SIZE: usize> {
-    pub mesh: Vec<Face<T, SIZE>>,
-    pub transparent_mesh: Vec<Face<T, SIZE>>,
+pub struct MeshResult<TE, const SIZE: usize> {
+    pub mesh: Vec<Face<TE, SIZE>>,
+    pub transparent_mesh: Vec<Face<TE, SIZE>>,
     pub unhandled: Vec<(usize, usize, usize)>,
 }

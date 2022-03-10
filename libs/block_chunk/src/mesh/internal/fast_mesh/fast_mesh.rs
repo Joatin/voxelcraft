@@ -1,15 +1,16 @@
-use crate::mesh::internal::handle_block::handle_block;
+use crate::mesh::internal::fast_mesh::handle_block::handle_block;
 use crate::mesh::{BlockDescriptor, MeshResult};
 use crate::Chunk;
 
 pub fn fast_mesh<
-    T: PartialEq + Clone,
-    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>,
+    T: Send + Sync,
+    TE: Clone + PartialEq,
+    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor<TE>>,
     const SIZE: usize,
 >(
     chunk: &Chunk<T, SIZE>,
     describe_callback: C,
-) -> MeshResult<T, SIZE> {
+) -> MeshResult<TE, SIZE> {
     let mut mesh = vec![];
     let mut transparent_mesh = vec![];
     let mut unhandled = vec![];
@@ -53,6 +54,7 @@ mod tests {
                 Some(BlockDescriptor {
                     is_standard_square: true,
                     is_transparent: false,
+                    texture_id: (),
                 })
             })
             .await;
@@ -73,6 +75,7 @@ mod tests {
                 Some(BlockDescriptor {
                     is_standard_square: true,
                     is_transparent: false,
+                    texture_id: (),
                 })
             }
         });

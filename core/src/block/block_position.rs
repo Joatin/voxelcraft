@@ -1,7 +1,7 @@
-use crate::block::BlockOffset;
 use crate::chunk::ChunkPosition;
+use block_chunk::BlockOffset;
 
-pub struct BlockPosition {
+pub struct BlockPosition<const SIZE: usize> {
     pub chunk_position: ChunkPosition,
-    pub offset: BlockOffset,
+    pub offset: BlockOffset<SIZE>,
 }
