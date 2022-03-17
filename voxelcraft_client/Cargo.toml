@@ -12,6 +12,7 @@ cgmath = "0.18"
 env_logger = "0.9"
 log = "0.4"
 wgpu = "0.12"
+wgpu_tokio = "0.12"
 pollster = "0.2"
 tokio = { version = "1.17.0", features = ["full"] }
 wgpu_glyph = "0.16.0"
@@ -30,6 +31,9 @@ voxelcraft_core = { path = "../core" }
 smallvec = "1.8.0"
 num_cpus = "1.13.1"
 block_chunk = { path = "../libs/block_chunk" }
+wgpu_async_utils = { path = "../libs/wgpu_async_utils" }
+face_texture_map = { path = "../libs/face_texture_map" }
+camera = { path = "../libs/camera" }
 
 [dev-dependencies]
 packs_test = {path = "../packs/test"}

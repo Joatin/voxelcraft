@@ -26,7 +26,7 @@ impl ChunkStorage<ChunkPosition> for FileStorage {
         &self,
         position: &ChunkPosition,
     ) -> Result<Option<Vec<u8>>, Box<dyn Error + Send + Sync>> {
-        todo!()
+        Ok(None)
     }
 }
 

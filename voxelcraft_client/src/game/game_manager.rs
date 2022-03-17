@@ -1,16 +1,17 @@
-use crate::game::block_texture_map::BlockTextureMap;
-use crate::game::camera_pipeline_utils::CameraPipelineUtils;
 use crate::game::{Game, LocalGame};
-use crate::gpu::primitives::TexturedArrayVertex;
+use crate::gpu::primitives::SmallTexturedArrayVertex;
 use crate::gpu::RenderContext;
 use crate::interface::Message;
 use crate::primitives::Size;
-use std::collections::HashMap;
 use std::error::Error;
 use std::sync::Arc;
 use tokio::task::JoinHandle;
 
-use wgpu::{BindGroupLayout, CommandBuffer, Device, Queue, RenderPipeline, TextureFormat};
+use crate::game::resources::GameResources;
+use pollster::FutureExt;
+use wgpu::{
+    CommandBuffer, CompareFunction, DepthStencilState, Device, Queue, RenderPipeline, TextureFormat,
+};
 use winit::dpi::PhysicalSize;
 
 enum GameWrapper {
@@ -38,9 +39,7 @@ pub struct GameManager {
     game_join_handle: Option<JoinHandle<()>>,
     game: GameWrapper,
     device: Arc<Device>,
-    pipelines: Arc<HashMap<String, RenderPipeline>>,
-    block_texture_map: Arc<BlockTextureMap>,
-    camera_utils: Arc<CameraPipelineUtils>,
+    resources: GameResources,
 }
 
 impl GameManager {
@@ -48,114 +47,31 @@ impl GameManager {
         device: &Arc<Device>,
         queue: &Arc<Queue>,
         texture_format: TextureFormat,
-        _size: &PhysicalSize<u32>,
-    ) -> Result<Self, Box<dyn Error>> {
+        size: &PhysicalSize<u32>,
+    ) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let messages = vec![];
-
-        let block_texture_map = Arc::new(BlockTextureMap::new(device, queue).await?);
-
-        let camera_utils = Arc::new(CameraPipelineUtils::new(device));
-
-        let pipelines =
-            Self::construct_pipelines(device, texture_format, &block_texture_map, &camera_utils);
+        let resources =
+            GameResources::new(&queue, &device, texture_format, size.width, size.height).await?;
 
         Ok(Self {
             messages,
             game_join_handle: None,
             game: GameWrapper::None,
             device: Arc::clone(&device),
-            pipelines,
-            block_texture_map,
-            camera_utils,
-        })
-    }
-
-    fn construct_pipelines(
-        device: &Arc<Device>,
-        texture_format: TextureFormat,
-        block_texture_map: &Arc<BlockTextureMap>,
-        camera_utils: &Arc<CameraPipelineUtils>,
-    ) -> Arc<HashMap<String, RenderPipeline>> {
-        let mut map = HashMap::new();
-
-        map.insert(
-            "BLOCK".to_string(),
-            Self::construct_block_pipeline(
-                device,
-                texture_format,
-                block_texture_map.bind_group_layout(),
-                camera_utils.bind_group_layout(),
-            ),
-        );
-
-        Arc::new(map)
-    }
-
-    fn construct_block_pipeline(
-        device: &Arc<Device>,
-        texture_format: TextureFormat,
-        bind_group_layout: &BindGroupLayout,
-        camera_bindgroup_layout: &BindGroupLayout,
-    ) -> RenderPipeline {
-        let render_pipeline_layout =
-            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                label: Some("Render Pipeline Layout"),
-                bind_group_layouts: &[bind_group_layout, camera_bindgroup_layout],
-                push_constant_ranges: &[],
-            });
-
-        let shader = device.create_shader_module(&wgpu::include_wgsl!("shaders/block_shader.wgsl"));
-
-        device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("Render Pipeline"),
-            layout: Some(&render_pipeline_layout),
-            vertex: wgpu::VertexState {
-                module: &shader,
-                entry_point: "vs_main",
-                buffers: &[TexturedArrayVertex::desc()],
-            },
-            primitive: wgpu::PrimitiveState {
-                topology: wgpu::PrimitiveTopology::TriangleList,
-                strip_index_format: None,
-                front_face: wgpu::FrontFace::Ccw,
-                cull_mode: Some(wgpu::Face::Back),
-                // Setting this to anything other than Fill requires Features::NON_FILL_POLYGON_MODE
-                polygon_mode: wgpu::PolygonMode::Fill,
-                // Requires Features::DEPTH_CLIP_CONTROL
-                unclipped_depth: false,
-                // Requires Features::CONSERVATIVE_RASTERIZATION
-                conservative: false,
-            },
-            fragment: Some(wgpu::FragmentState {
-                // 3.
-                module: &shader,
-                entry_point: "fs_main",
-                targets: &[wgpu::ColorTargetState {
-                    // 4.
-                    format: texture_format,
-                    blend: Some(wgpu::BlendState::REPLACE),
-                    write_mask: wgpu::ColorWrites::ALL,
-                }],
-            }),
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState {
-                count: 1,
-                mask: !0,
-                alpha_to_coverage_enabled: false,
-            },
-            multiview: None,
+            resources,
         })
     }
 
     pub fn render(&mut self, render_context: &RenderContext) -> Vec<CommandBuffer> {
         if let Some(game) = self.game.game_mut() {
-            game.render(&render_context)
+            game.render(&render_context, &mut self.resources)
         } else {
             vec![]
         }
     }
 
     pub fn cleanup(&mut self) {
+        self.resources.cleanup();
         if let Some(game) = self.game.game_mut() {
             game.cleanup()
         }
@@ -177,12 +93,7 @@ impl GameManager {
             "Creating new game".to_string(),
             None,
         ));
-        let local_game = LocalGame::new(
-            device,
-            &self.pipelines,
-            &self.block_texture_map,
-            Arc::clone(&self.camera_utils),
-        );
+        let local_game = LocalGame::new(device);
         self.game = GameWrapper::Local(local_game)
     }
 
@@ -196,12 +107,21 @@ impl GameManager {
     }
 
     pub fn resize(&mut self, size: Size) {
+        self.resources
+            .resize(&self.device, size.width as u32, size.height as u32)
+            .block_on();
         if let Some(game) = self.game.game_mut() {
             game.resize(size)
         }
     }
 
     pub fn on_mouse_moved(&mut self, x: f64, y: f64) {
+        if x != 0.0 {
+            self.resources.camera.increase_yaw(x, 0.1)
+        }
+        if y != 0.0 {
+            self.resources.camera.increase_pitch(y, 0.1)
+        }
         if let Some(game) = self.game.game_mut() {
             game.on_mouse_moved(x, y)
         }

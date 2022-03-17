@@ -9,4 +9,4 @@ mod remote;
 mod storage;
 mod world;
 
-pub use self::chunk::Chunk;
+pub use self::chunk::*;

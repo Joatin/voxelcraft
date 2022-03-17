@@ -1,8 +1,9 @@
 use crate::event::WorldEvent;
 use crate::Chunk;
 use std::error::Error;
+use std::future::Future;
 use std::sync::Arc;
-use tokio::sync::broadcast;
+use tokio::sync::{broadcast, OwnedRwLockReadGuard};
 use voxelcraft_core::chunk::ChunkPosition;
 use voxelcraft_core::entity::EntityPosition;
 
@@ -18,8 +19,13 @@ pub trait Client {
     /// You position
     async fn position(&self) -> EntityPosition;
 
-    async fn get_chunk(
+    async fn get_chunk<
+        C: Send + Sync + FnOnce(OwnedRwLockReadGuard<Chunk>) -> FR,
+        FR: Future<Output = R> + Send,
+        R: Send + Sync,
+    >(
         &self,
         chunk_position: ChunkPosition,
-    ) -> Result<Arc<Chunk>, Box<dyn Error + Send + Sync>>;
+        callback: C,
+    ) -> Result<R, Box<dyn Error + Send + Sync>>;
 }

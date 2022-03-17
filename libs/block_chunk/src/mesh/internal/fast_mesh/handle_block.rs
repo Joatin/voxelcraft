@@ -4,7 +4,7 @@ use crate::{BlockOffset, Chunk};
 
 pub fn handle_block<
     T: Send + Sync,
-    TE: PartialEq + Clone,
+    TE: Send + Sync + PartialEq + Clone,
     C: Send + Sync + Fn(&T) -> Option<BlockDescriptor<TE>>,
     const SIZE: usize,
 >(

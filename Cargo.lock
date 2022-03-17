@@ -237,6 +237,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "camera"
+version = "0.0.1"
+dependencies = [
+ "bytemuck",
+ "cgmath",
+ "tokio",
+ "wgpu",
+ "wgpu_tokio",
+]
+
+[[package]]
 name = "cast"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -738,6 +749,17 @@ dependencies = [
  "lebe",
  "smallvec",
  "threadpool",
+]
+
+[[package]]
+name = "face_texture_map"
+version = "0.0.1"
+dependencies = [
+ "mipmap",
+ "voxelcraft_mod",
+ "wgpu",
+ "wgpu_async_utils",
+ "wgpu_tokio",
 ]
 
 [[package]]
@@ -1456,6 +1478,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b9f1c5b025cda876f66ef43a113f91ebc9f4ccef34843000e0adf6ebbab84e21"
 dependencies = [
  "winapi",
+]
+
+[[package]]
+name = "mipmap"
+version = "0.0.1"
+source = "git+https://github.com/Joatin/mipmap#8c88efab49bd62ca31f96e519bad300fcadc4064"
+dependencies = [
+ "image",
+ "mipmap_macros",
+]
+
+[[package]]
+name = "mipmap_macros"
+version = "0.0.1"
+source = "git+https://github.com/Joatin/mipmap#8c88efab49bd62ca31f96e519bad300fcadc4064"
+dependencies = [
+ "proc-macro2",
+ "quote",
 ]
 
 [[package]]
@@ -2462,7 +2502,7 @@ version = "1.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4ee73e6e4924fe940354b8d4d98cad5231175d615cd855b758adc658c0aac6a0"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if 0.1.10",
  "rand",
  "static_assertions",
 ]
@@ -2514,8 +2554,10 @@ dependencies = [
  "async-trait",
  "block_chunk",
  "bytemuck",
+ "camera",
  "cgmath",
  "env_logger",
+ "face_texture_map",
  "futures",
  "iced",
  "iced_native",
@@ -2534,7 +2576,9 @@ dependencies = [
  "voxelcraft_mod",
  "voxelcraft_server",
  "wgpu",
+ "wgpu_async_utils",
  "wgpu_glyph",
+ "wgpu_tokio",
  "window_clipboard",
  "winit 0.26.1",
 ]
@@ -2857,6 +2901,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "wgpu_async_utils"
+version = "0.0.1"
+dependencies = [
+ "cgmath",
+ "image",
+ "tokio",
+ "wgpu",
+ "wgpu_tokio",
+]
+
+[[package]]
 name = "wgpu_glyph"
 version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2865,6 +2920,17 @@ dependencies = [
  "bytemuck",
  "glyph_brush",
  "log",
+ "wgpu",
+]
+
+[[package]]
+name = "wgpu_tokio"
+version = "0.12.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3bf8cced531127da9d4ceb55535f1f0fa851f4541915d998211db2ce9236d5dd"
+dependencies = [
+ "async-trait",
+ "tokio",
  "wgpu",
 ]
 

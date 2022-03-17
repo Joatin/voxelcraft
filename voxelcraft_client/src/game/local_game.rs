@@ -1,15 +1,9 @@
-use crate::chunk::{ChunkMesh, MeshableChunk};
-
-use crate::game::block_texture_map::BlockTextureMap;
-use crate::game::camera_pipeline_utils::CameraPipelineUtils;
+use crate::chunk::ChunkMesh;
 use crate::game::game::Game;
-use crate::gpu::camera::{Camera, Projection};
 use crate::gpu::RenderContext;
 use crate::interface::{Message, IN_GAME_HUD_PAGE_ROUTE};
 use crate::primitives::Size;
 use futures::{stream, StreamExt, TryStreamExt};
-use pollster::FutureExt;
-use std::collections::HashMap;
 use std::error::Error;
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::Arc;
@@ -20,7 +14,12 @@ use voxelcraft_server::client::Client;
 use voxelcraft_server::local::new_local_world;
 use voxelcraft_server::local::LocalClient;
 
-use wgpu::{CommandBuffer, CommandEncoderDescriptor, Device, RenderPassDescriptor, RenderPipeline};
+use crate::game::resources::GameResources;
+use iced_wgpu::wgpu::CommandEncoder;
+use wgpu::{
+    CommandBuffer, CommandEncoderDescriptor, Device, Operations, RenderPassDepthStencilAttachment,
+    RenderPassDescriptor, RenderPipeline,
+};
 
 #[derive(Debug)]
 pub struct LocalGame {
@@ -29,26 +28,14 @@ pub struct LocalGame {
     is_loading: Arc<AtomicBool>,
     device: Arc<Device>,
     chunk_meshes: Arc<Mutex<Vec<ChunkMesh>>>,
-    pipelines: Arc<HashMap<String, RenderPipeline>>,
-    block_texture_map: Arc<BlockTextureMap>,
-    camera_utils: Arc<CameraPipelineUtils>,
-    camera: Camera,
-    projection: Projection,
 }
 
 impl LocalGame {
-    pub fn new(
-        device: Arc<Device>,
-        pipelines: &Arc<HashMap<String, RenderPipeline>>,
-        block_texture_map: &Arc<BlockTextureMap>,
-        camera_utils: Arc<CameraPipelineUtils>,
-    ) -> Self {
+    pub fn new(device: Arc<Device>) -> Self {
         let client = Arc::new(new_local_world(0, Uuid::new_v4()));
         let messages = Arc::new(std::sync::Mutex::new(vec![]));
         let chunk_meshes = Arc::new(Mutex::new(vec![]));
         let is_loading = Arc::new(AtomicBool::new(true));
-        let camera = Camera::new((0.0, 5.0, 10.0), cgmath::Deg(-90.0), cgmath::Deg(-20.0));
-        let projection = Projection::new(800, 600, cgmath::Deg(45.0), 0.1, 100.0);
 
         tokio::spawn(Self::process_events(Arc::clone(&client)));
         tokio::spawn(Self::start_connection_process(
@@ -65,11 +52,6 @@ impl LocalGame {
             is_loading,
             device,
             chunk_meshes,
-            pipelines: Arc::clone(&pipelines),
-            block_texture_map: Arc::clone(&block_texture_map),
-            camera_utils,
-            camera,
-            projection,
         }
     }
 
@@ -86,7 +68,7 @@ impl LocalGame {
 
         let player_position = client.position().await;
 
-        let chunks_to_mesh = player_position.surrounding_chunks(1);
+        let chunks_to_mesh = player_position.surrounding_chunks(2);
         let chunks_to_mesh_count = chunks_to_mesh.len();
 
         Self::send_loading_message(&messages, "Building chunks in the player vicinity", None);
@@ -102,9 +84,14 @@ impl LocalGame {
                 let messages = Arc::clone(&messages);
 
                 async move {
-                    let chunk = client.get_chunk(position).await?;
-                    let handle = tokio::spawn(async move { chunk.create_mesh(&device).await });
-                    let mesh = handle.await.unwrap();
+                    let handle = tokio::spawn(async move {
+                        client
+                            .get_chunk(position, |chunk| async move {
+                                ChunkMesh::new(&device, &chunk, &position).await
+                            })
+                            .await
+                    });
+                    let mesh = handle.await???;
                     let current_count = count_processed.fetch_add(1, Ordering::Relaxed);
                     let progress = (100.0 / chunks_to_mesh_count as f32) * current_count as f32;
                     Self::send_loading_message(
@@ -171,45 +158,41 @@ impl LocalGame {
         }
     }
 
-    async fn render_chunk_meshes(
-        chunk_meshes: Arc<Mutex<Vec<ChunkMesh>>>,
-        pipelines: Arc<HashMap<String, RenderPipeline>>,
-        block_texture_map: Arc<BlockTextureMap>,
-        camera_utils: Arc<CameraPipelineUtils>,
-        render_context: RenderContext,
-    ) -> Vec<CommandBuffer> {
-        let mut chunk_meshes = chunk_meshes.lock().await;
+    fn render_chunk_meshes(
+        &self,
+        render_context: &RenderContext,
+        resources: &mut GameResources,
+        encoder: &mut CommandEncoder,
+    ) {
+        let mut chunk_meshes = self.chunk_meshes.blocking_lock();
 
-        let mut encoder = render_context
-            .device
-            .create_command_encoder(&CommandEncoderDescriptor {
-                label: Some("Chunk command encoder"),
-            });
+        let mut render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
+            label: Some("Chunk render pass"),
+            color_attachments: &[wgpu::RenderPassColorAttachment {
+                view: &render_context.view,
+                resolve_target: None,
+                ops: Operations {
+                    load: wgpu::LoadOp::Load,
+                    store: true,
+                },
+            }],
+            depth_stencil_attachment: Some(RenderPassDepthStencilAttachment {
+                view: resources.geometry_buffer.depth_view(),
+                depth_ops: Some(Operations {
+                    load: wgpu::LoadOp::Clear(1.0),
+                    store: true,
+                }),
+                stencil_ops: None,
+            }),
+        });
 
-        {
-            let mut render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
-                label: Some("Chunk render pass"),
-                color_attachments: &[wgpu::RenderPassColorAttachment {
-                    view: &render_context.view,
-                    resolve_target: None,
-                    ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Load,
-                        store: true,
-                    },
-                }],
-                depth_stencil_attachment: None,
-            });
+        render_pass.set_pipeline(&resources.block_pipeline);
+        render_pass.set_bind_group(0, resources.face_texture_map.bind_group(), &[]);
+        render_pass.set_bind_group(1, resources.camera.bind_group(), &[]);
 
-            render_pass.set_pipeline(pipelines.get("BLOCK").unwrap());
-            render_pass.set_bind_group(0, block_texture_map.bind_group(), &[]);
-            render_pass.set_bind_group(1, camera_utils.bind_group(), &[]);
-
-            chunk_meshes.iter_mut().for_each(|mesh| {
-                mesh.render(&render_context, &mut render_pass);
-            });
-        }
-
-        vec![encoder.finish()]
+        chunk_meshes.iter_mut().for_each(|mesh| {
+            mesh.render(&render_context, &mut render_pass);
+        });
     }
 }
 
@@ -218,54 +201,32 @@ impl Game for LocalGame {
         todo!()
     }
 
-    fn render(&mut self, render_context: &RenderContext) -> Vec<CommandBuffer> {
+    fn render(
+        &mut self,
+        render_context: &RenderContext,
+        resources: &mut GameResources,
+    ) -> Vec<CommandBuffer> {
         if !self.is_loading.load(Ordering::Relaxed) {
-            let render_context = render_context.clone();
-            let chunk_meshes = Arc::clone(&self.chunk_meshes);
-            let pipelines = Arc::clone(&self.pipelines);
-            let block_texture_map = Arc::clone(&self.block_texture_map);
-            let camera_utils = Arc::clone(&self.camera_utils);
+            let mut encoder =
+                render_context
+                    .device
+                    .create_command_encoder(&CommandEncoderDescriptor {
+                        label: Some("Camera Uniform Encoder"),
+                    });
 
-            let camera = self.camera.clone();
-            let projection = self.projection.clone();
+            resources
+                .camera
+                .write_camera(&render_context.device, &mut encoder);
 
-            let handle = tokio::spawn(async move {
-                let mut command_buffers = {
-                    let mut encoder =
-                        render_context
-                            .device
-                            .create_command_encoder(&CommandEncoderDescriptor {
-                                label: Some("Camera Uniform Encoder"),
-                            });
-                    camera_utils
-                        .update(&render_context.device, &mut encoder, &camera, &projection)
-                        .await;
+            self.render_chunk_meshes(render_context, resources, &mut encoder);
 
-                    vec![encoder.finish()]
-                };
-
-                command_buffers.append(
-                    &mut Self::render_chunk_meshes(
-                        chunk_meshes,
-                        pipelines,
-                        block_texture_map,
-                        camera_utils,
-                        render_context,
-                    )
-                    .await,
-                );
-
-                command_buffers
-            });
-            handle.block_on().unwrap()
+            vec![encoder.finish()]
         } else {
             vec![]
         }
     }
 
-    fn cleanup(&mut self) {
-        self.camera_utils.cleanup()
-    }
+    fn cleanup(&mut self) {}
 
     fn get_messages(&mut self) -> Vec<Message> {
         let mut list = self.messages.lock().unwrap();
@@ -274,13 +235,9 @@ impl Game for LocalGame {
         messages
     }
 
-    fn resize(&mut self, size: Size) {
-        self.projection
-            .resize(size.width as u32, size.height as u32)
-    }
+    fn resize(&mut self, size: Size) {}
 
     fn on_mouse_moved(&mut self, x: f64, y: f64) {
         // self.camera.
-        self.camera.rotate(x, y);
     }
 }

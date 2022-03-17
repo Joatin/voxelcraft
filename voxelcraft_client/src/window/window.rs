@@ -36,7 +36,7 @@ impl Window {
 
         tokio::task::block_in_place(move || {
             self.event_loop.run(move |event, _target, control_flow| {
-                *control_flow = ControlFlow::Poll;
+                *control_flow = ControlFlow::Wait;
                 Self::handle_event(
                     &window,
                     event,

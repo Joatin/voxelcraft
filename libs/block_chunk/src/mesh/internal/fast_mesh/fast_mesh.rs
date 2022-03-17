@@ -4,7 +4,7 @@ use crate::Chunk;
 
 pub fn fast_mesh<
     T: Send + Sync,
-    TE: Clone + PartialEq,
+    TE: Clone + PartialEq + Send + Sync,
     C: Send + Sync + Fn(&T) -> Option<BlockDescriptor<TE>>,
     const SIZE: usize,
 >(

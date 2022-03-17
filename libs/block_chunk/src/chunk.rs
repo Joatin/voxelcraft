@@ -9,13 +9,13 @@ use std::mem;
 
 #[derive(Clone, Debug, bincode::Encode, bincode::Decode)]
 pub struct Chunk<T: 'static + Send + Sync, const SIZE: usize> {
-    blocks: [[[T; SIZE]; SIZE]; SIZE],
+    blocks: Box<[[[T; SIZE]; SIZE]; SIZE]>,
 }
 
 impl<T: 'static + Send + Sync + Default + Copy, const SIZE: usize> Chunk<T, SIZE> {
     pub fn new() -> Self {
         Self {
-            blocks: [[[T::default(); SIZE]; SIZE]; SIZE],
+            blocks: Box::new([[[T::default(); SIZE]; SIZE]; SIZE]),
         }
     }
 }
@@ -48,7 +48,7 @@ impl<T: 'static + Send + Sync, const SIZE: usize> Chunk<T, SIZE> {
 
 impl<T: 'static + Send + Sync + Clone + Copy, const SIZE: usize> Chunk<T, SIZE> {
     pub fn new_checker(val_1: T, val_2: T) -> Self {
-        let mut blocks = [[[val_1; SIZE]; SIZE]; SIZE];
+        let mut blocks = Box::new([[[val_1; SIZE]; SIZE]; SIZE]);
         for x in 0..SIZE {
             for y in 0..SIZE {
                 for z in 0..SIZE {
@@ -60,6 +60,16 @@ impl<T: 'static + Send + Sync + Clone + Copy, const SIZE: usize> Chunk<T, SIZE> 
         }
 
         Self { blocks }
+    }
+
+    pub fn set_all(&mut self, value: T) {
+        for x in 0..SIZE {
+            for y in 0..SIZE {
+                for z in 0..SIZE {
+                    self.blocks[z][y][x] = value
+                }
+            }
+        }
     }
 }
 

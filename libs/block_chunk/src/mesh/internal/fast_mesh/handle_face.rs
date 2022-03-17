@@ -4,7 +4,7 @@ use crate::{BlockOffset, Chunk};
 
 pub fn handle_face<
     T: Send + Sync,
-    TE,
+    TE: Send + Sync,
     FC: FnOnce(&BlockOffset<SIZE>, &TE, bool) -> Face<TE, SIZE>,
     C: Send + Sync + Fn(&T) -> Option<BlockDescriptor<TE>>,
     const SIZE: usize,

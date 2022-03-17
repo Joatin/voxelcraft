@@ -4,16 +4,17 @@ use crate::entity::Player;
 use crate::event::WorldEvent;
 use crate::storage::{FileStorage, Storage};
 use crate::world::DefaultWorldGenerator;
-use crate::Chunk;
+use crate::{BlockId, Chunk, CHUNK_SIZE};
 use block_chunk::ChunkCache;
 use std::collections::HashMap;
 use std::error::Error;
+use std::future::Future;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::mpsc::channel;
 use tokio::sync::mpsc::Receiver;
 use tokio::sync::mpsc::Sender;
-use tokio::sync::{broadcast, Mutex, RwLock};
+use tokio::sync::{broadcast, Mutex, OwnedRwLockReadGuard, RwLock};
 use tokio::time::interval;
 use uuid::Uuid;
 use voxelcraft_core::chunk::ChunkPosition;
@@ -23,7 +24,7 @@ use voxelcraft_mod::{Dimension, Entity, DEFAULT_DIMENSION_ID};
 #[derive(Debug)]
 pub struct World {
     storage: Arc<dyn Storage>,
-    chunk_cache: Arc<ChunkCache<ChunkPosition, u32, 32>>,
+    chunk_cache: Arc<ChunkCache<ChunkPosition, BlockId, CHUNK_SIZE>>,
     name: String,
     players: Mutex<HashMap<Uuid, Player>>,
     dimensions: Arc<RwLock<HashMap<Uuid, Arc<dyn Dimension>>>>,
@@ -108,7 +109,7 @@ impl World {
     pub fn start_update_loop(self: &Arc<Self>) {
         let world = Arc::clone(self);
         tokio::spawn(async move {
-            let mut interval = interval(Duration::from_millis(20));
+            let mut interval = interval(Duration::from_millis(200));
             loop {
                 interval.tick().await;
                 world.update().await.unwrap();
@@ -120,15 +121,18 @@ impl World {
         self.outgoing_events_sender.subscribe()
     }
 
-    pub async fn get_chunk<C: Send + Sync + FnOnce(&Chunk) -> R, R>(
+    pub async fn get_chunk<
+        C: Send + Sync + FnOnce(OwnedRwLockReadGuard<Chunk>) -> FR,
+        FR: Future<Output = R> + Send,
+        R: Send + Sync,
+    >(
         &self,
         chunk_position: ChunkPosition,
         callback: C,
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+    ) -> Result<R, Box<dyn Error + Send + Sync>> {
         self.chunk_cache
             .borrow_chunk(&chunk_position, callback)
-            .await?;
-        Ok(())
+            .await
     }
 
     pub async fn get_player_position(&self, player_id: Uuid) -> Option<EntityPosition> {

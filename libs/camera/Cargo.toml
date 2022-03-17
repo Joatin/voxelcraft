@@ -1,0 +1,12 @@
+[package]
+name = "camera"
+version = "0.0.1"
+edition = "2021"
+resolver = "2"
+
+[dependencies]
+cgmath = "^0.18"
+wgpu = "^0.12"
+wgpu_tokio = "^0.12"
+bytemuck = "^1.7"
+tokio = "^1.17"

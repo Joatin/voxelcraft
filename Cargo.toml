@@ -9,5 +9,8 @@ members = [
     "mods/test",
     "packs/test",
     "core",
-    "libs/block_chunk"
+    "libs/block_chunk",
+    "libs/wgpu_async_utils",
+    "libs/face_texture_map",
+    "libs/camera"
 ]

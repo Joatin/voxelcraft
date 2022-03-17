@@ -1,0 +1,12 @@
+[package]
+name = "wgpu_async_utils"
+version = "0.0.1"
+edition = "2021"
+resolver = "2"
+
+[dependencies]
+tokio = { version = "^1.17", features = ["rt"] }
+wgpu = "^0.12"
+cgmath = "^0.18"
+wgpu_tokio = "0.12.6"
+image = "^0.24"

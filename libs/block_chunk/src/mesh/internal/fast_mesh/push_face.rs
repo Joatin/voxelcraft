@@ -1,6 +1,6 @@
 use crate::mesh::{BlockDescriptor, Face};
 
-pub fn push_face<TE, const SIZE: usize>(
+pub fn push_face<TE: Send + Sync, const SIZE: usize>(
     mesh: &mut Vec<Face<TE, SIZE>>,
     transparent_mesh: &mut Vec<Face<TE, SIZE>>,
     descriptor: &BlockDescriptor<TE>,

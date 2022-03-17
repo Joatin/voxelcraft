@@ -2,10 +2,11 @@ use crate::{Chunk, ChunkFactory, ChunkStorage};
 use bincode::{Decode, Encode};
 use std::collections::HashMap;
 use std::error::Error;
+use std::future::Future;
 use std::hash::Hash;
 use std::mem;
 use std::sync::Arc;
-use tokio::sync::RwLock;
+use tokio::sync::{OwnedRwLockReadGuard, RwLock, RwLockReadGuard};
 
 #[derive(Debug)]
 pub struct ChunkCache<
@@ -49,38 +50,42 @@ impl<
         }
     }
 
-    pub async fn borrow_chunk<C: Send + Sync + FnOnce(&Chunk<T, SIZE>) -> R, R>(
+    /// Borrows a chunk from the cache. The chunk can only be used for the duration of the closure
+    ///
+    /// # Returns
+    /// The result from the closure
+    ///
+    /// # Errors
+    /// If the storage can not load the given chunk
+    pub async fn borrow_chunk<
+        C: Send + Sync + FnOnce(OwnedRwLockReadGuard<Chunk<T, SIZE>>) -> FR,
+        FR: Future<Output = R> + Send,
+        R: Send + Sync,
+    >(
         &self,
         position: &P,
         callback: C,
     ) -> Result<R, Box<dyn Error + Send + Sync>> {
         if let Some(chunk) = self.acquire_from_chunk_cache(position).await {
-            let chunk = chunk.read().await;
-            Ok(callback(&chunk))
+            let lock = chunk.read_owned().await;
+            Ok(callback(lock).await)
+        } else if let Some(chunk) = self.load_from_compressed_cache(position).await? {
+            let lock = chunk.read_owned().await;
+            Ok(callback(lock).await)
+        } else if let Some(chunk) = self.load_from_storage(position).await? {
+            let lock = chunk.read_owned().await;
+            Ok(callback(lock).await)
         } else {
-            if let Some(chunk) = self.load_from_compressed_cache(position).await? {
-                let chunk = chunk.read().await;
-                Ok(callback(&chunk))
-            } else {
-                if let Some(chunk) = self.load_from_storage(position).await? {
-                    let chunk = chunk.read().await;
-                    Ok(callback(&chunk))
-                } else {
-                    let chunk = self.load_from_factory(position).await;
-                    let chunk = chunk.read().await;
-                    Ok(callback(&chunk))
-                }
-            }
+            let chunk = self.load_from_factory(position).await;
+            let lock = chunk.read_owned().await;
+            Ok(callback(lock).await)
         }
     }
 
     async fn acquire_from_chunk_cache(&self, position: &P) -> Option<Arc<RwLock<Chunk<T, SIZE>>>> {
         let lock = self.chunks.read().await;
-        if let Some(chunk) = lock.get(position) {
-            Some(Arc::clone(&chunk))
-        } else {
-            None
-        }
+        lock.get(position)
+            .and_then(|chunk| Some(Arc::clone(&chunk)))
     }
 
     async fn load_from_compressed_cache(
@@ -138,7 +143,7 @@ mod tests {
     use crate::chunk_cache::ChunkCache;
     use crate::chunk_factory::MockChunkFactory;
     use crate::chunk_storage::MockChunkStorage;
-    use crate::Chunk;
+    use crate::{BlockOffset, Chunk};
     use std::error::Error;
     use std::sync::Arc;
 
@@ -154,7 +159,11 @@ mod tests {
 
         let cache = ChunkCache::new(1_000_000, 1_000_000, Arc::new(mock_storage), mock_factory);
 
-        cache.borrow_chunk(&1, |_chunk| {}).await?;
+        cache
+            .borrow_chunk(&1, |chunk| async move {
+                chunk.get(&BlockOffset::default());
+            })
+            .await?;
 
         Ok(())
     }

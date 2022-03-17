@@ -5,7 +5,7 @@ use crate::Chunk;
 use std::fmt::Debug;
 
 #[async_trait::async_trait]
-pub trait MeshableChunk<T, TE, const SIZE: usize> {
+pub trait MeshableChunk<T: Send + Sync, TE: Send + Sync, const SIZE: usize>: Send + Sync {
     /// Only performs quick culling
     async fn fast_mesh<C: Send + Sync + Fn(&T) -> Option<BlockDescriptor<TE>>>(
         &self,
