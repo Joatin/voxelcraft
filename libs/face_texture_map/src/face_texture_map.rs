@@ -122,7 +122,7 @@ impl FaceTextureMap {
     }
 
     pub fn get_texture_index_for_face(&self, mod_id: ModId, face_id: FaceId) -> i32 {
-        0
+        self.mappings.get(&(mod_id, face_id)).map_or(0, |i| *i)
     }
 
     pub fn texture(&self) -> &Texture {

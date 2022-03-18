@@ -6,6 +6,7 @@ mod chunk;
 mod context;
 mod game;
 mod gpu;
+mod input;
 mod interface;
 mod primitives;
 mod setup_voxelcraft;

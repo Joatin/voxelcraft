@@ -68,7 +68,7 @@ impl LocalGame {
 
         let player_position = client.position().await;
 
-        let chunks_to_mesh = player_position.surrounding_chunks(2);
+        let chunks_to_mesh = player_position.surrounding_chunks(6);
         let chunks_to_mesh_count = chunks_to_mesh.len();
 
         Self::send_loading_message(&messages, "Building chunks in the player vicinity", None);
