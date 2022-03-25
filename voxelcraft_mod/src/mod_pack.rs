@@ -1,21 +1,15 @@
 use crate::block::Block;
-use crate::Mod;
-use futures::future::join_all;
+use crate::{Dimension, Mod};
+use futures::{stream, StreamExt};
+use std::fmt::Debug;
 use std::sync::Arc;
+use voxelcraft_id::DimensionId;
 
 #[async_trait::async_trait]
-pub trait ModPack {
+pub trait ModPack: Send + Sync + Debug {
+    fn name(&self) -> &str;
+
     fn mods(&self) -> &[Arc<dyn Mod>];
 
-    async fn register_blocks(&self) -> Vec<Arc<dyn Block>> {
-        join_all(
-            self.mods()
-                .iter()
-                .map(|m| async { m.register_blocks().await }),
-        )
-        .await
-        .into_iter()
-        .flatten()
-        .collect()
-    }
+    fn default_dimension(&self) -> &'static DimensionId;
 }

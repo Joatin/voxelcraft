@@ -19,7 +19,7 @@ pub struct ChunkCache<
     chunk_count: usize,
     max_compressed_byte_size: usize,
     storage: Arc<dyn ChunkStorage<P>>,
-    factory: Box<dyn ChunkFactory<P, Chunk = Chunk<T, SIZE>>>,
+    factory: Arc<dyn ChunkFactory<P, Chunk = Chunk<T, SIZE>>>,
 }
 
 impl<
@@ -28,6 +28,7 @@ impl<
         const SIZE: usize,
     > ChunkCache<P, T, SIZE>
 {
+    #[must_use]
     pub fn new<
         S: 'static + ChunkStorage<P>,
         F: 'static + ChunkFactory<P, Chunk = Chunk<T, SIZE>>,
@@ -35,10 +36,9 @@ impl<
         max_in_mem_chunk_byte_size: usize,
         max_compressed_byte_size: usize,
         storage: Arc<S>,
-        factory: F,
+        factory: Arc<F>,
     ) -> Self {
         let chunk_count = max_in_mem_chunk_byte_size / mem::size_of::<Chunk<T, SIZE>>();
-        let factory = Box::new(factory);
 
         Self {
             compressed_chunks: RwLock::new(HashMap::new()),

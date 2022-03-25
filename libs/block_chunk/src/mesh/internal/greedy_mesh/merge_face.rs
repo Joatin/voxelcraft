@@ -1,5 +1,5 @@
 use crate::mesh::internal::greedy_mesh::should_create_face::should_create_face;
-use crate::mesh::{BlockDescriptor, Face};
+use crate::mesh::{BlockDescriptor, Face, FaceDirection};
 use crate::{BlockOffset, Chunk};
 use std::fmt::Debug;
 
@@ -8,8 +8,9 @@ use std::fmt::Debug;
 pub fn merge_face<
     T: Debug + Send + Sync,
     TE: Sync + Send + Clone + PartialEq + Debug,
-    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor<TE>>,
+    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>,
     FC: Send + Sync + Fn(&BlockOffset<SIZE>, &TE, bool) -> Face<TE, SIZE>,
+    TEC: Send + Sync + Fn(&T, FaceDirection) -> TE,
     const SIZE: usize,
 >(
     chunk: &Chunk<T, SIZE>,
@@ -20,6 +21,8 @@ pub fn merge_face<
     neighbour_position: Option<BlockOffset<SIZE>>,
     mut current_face: &mut Option<Face<TE, SIZE>>,
     face_callback: FC,
+    texture_callback: &TEC,
+    face_direction: FaceDirection,
 ) {
     let block = chunk.get(position);
     if let Some(descriptor) = describe_callback(block) {
@@ -29,7 +32,7 @@ pub fn merge_face<
             } else {
                 current_face.replace(face_callback(
                     position,
-                    &descriptor.texture_id,
+                    &texture_callback(block, face_direction),
                     descriptor.is_transparent,
                 ));
             }

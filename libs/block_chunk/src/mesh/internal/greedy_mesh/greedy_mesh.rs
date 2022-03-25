@@ -1,16 +1,18 @@
 use crate::mesh::internal::greedy_mesh::merge_face::merge_face;
-use crate::mesh::{BlockDescriptor, Face, MeshResult};
+use crate::mesh::{BlockDescriptor, Face, FaceDirection, MeshResult};
 use crate::{BlockOffset, Chunk};
 use std::fmt::Debug;
 
 pub fn greedy_mesh<
     T: Sync + Send + Debug,
     TE: Sync + Send + Clone + PartialEq + Debug,
-    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor<TE>>,
+    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>,
+    TEC: Send + Sync + Fn(&T, FaceDirection) -> TE,
     const SIZE: usize,
 >(
     chunk: &Chunk<T, SIZE>,
     describe_callback: C,
+    texture_callback: TEC,
 ) -> MeshResult<TE, SIZE> {
     let mut mesh = vec![];
     let mut transparent_mesh = vec![];
@@ -51,6 +53,8 @@ pub fn greedy_mesh<
                         position.north(),
                         &mut current_north_face,
                         Face::north,
+                        &texture_callback,
+                        FaceDirection::North,
                     );
                     merge_face(
                         chunk,
@@ -61,6 +65,8 @@ pub fn greedy_mesh<
                         position.south(),
                         &mut current_south_face,
                         Face::south,
+                        &texture_callback,
+                        FaceDirection::South,
                     );
                 }
 
@@ -75,6 +81,8 @@ pub fn greedy_mesh<
                         position.west(),
                         &mut current_west_face,
                         Face::west,
+                        &texture_callback,
+                        FaceDirection::West,
                     );
                     merge_face(
                         chunk,
@@ -85,6 +93,8 @@ pub fn greedy_mesh<
                         position.east(),
                         &mut current_east_face,
                         Face::east,
+                        &texture_callback,
+                        FaceDirection::East,
                     );
                 }
                 {
@@ -98,6 +108,8 @@ pub fn greedy_mesh<
                         position.up(),
                         &mut current_up_face,
                         Face::up,
+                        &texture_callback,
+                        FaceDirection::Up,
                     );
                     merge_face(
                         chunk,
@@ -108,6 +120,8 @@ pub fn greedy_mesh<
                         position.down(),
                         &mut current_down_face,
                         Face::down,
+                        &texture_callback,
+                        FaceDirection::Down,
                     );
                 }
             }
@@ -176,10 +190,9 @@ mod tests {
         let chunk = Chunk::<usize, 8>::default();
 
         let result = greedy_mesh(&chunk, |_| {
-            Some(BlockDescriptor::<()> {
+            Some(BlockDescriptor {
                 is_standard_square: true,
                 is_transparent: false,
-                texture_id: (),
             })
         });
 
@@ -196,10 +209,9 @@ mod tests {
             if *val == 0 {
                 None
             } else {
-                Some(BlockDescriptor::<()> {
+                Some(BlockDescriptor {
                     is_standard_square: true,
                     is_transparent: false,
-                    texture_id: (),
                 })
             }
         });

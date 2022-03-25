@@ -2,13 +2,13 @@
 name = "face_texture_map"
 version = "0.0.1"
 edition = "2021"
-resolver = "2"
 
 
 [dependencies]
 wgpu = "^0.12"
 wgpu_async_utils = { path = "../wgpu_async_utils" }
 voxelcraft_mod = { path = "../../voxelcraft_mod" }
+voxelcraft_id = { path = "../id" }
 wgpu_tokio = "0.12.6"
 mipmap = { git = "https://github.com/Joatin/mipmap" }
 

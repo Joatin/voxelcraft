@@ -9,3 +9,7 @@ crate-type = ["staticlib", "lib"]
 
 [dependencies]
 voxelcraft_mod = { path = "../../voxelcraft_mod" }
+voxelcraft_id = { path = "../../libs/id" }
+voxelcraft_client = { path = "../../client" }
+voxelcraft_standard_blocks = { path = "../../mods/standard_blocks" }
+voxelcraft_over_world_dimension = { path = "../../mods/over_world_dimension" }

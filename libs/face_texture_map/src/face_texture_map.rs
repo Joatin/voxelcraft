@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::num::NonZeroU8;
 use std::sync::Arc;
-use voxelcraft_mod::{FaceId, ModId};
+use voxelcraft_id::FaceId;
 use wgpu::{BindGroup, BindGroupLayout, Device, Extent3d, Queue, Sampler, Texture, TextureFormat};
 use wgpu_async_utils::texture::TextureArray;
 use wgpu_tokio::DeviceAsyncExt;
@@ -14,7 +14,7 @@ pub struct FaceTextureMap {
     sampler: Sampler,
     bind_group: BindGroup,
     bind_group_layout: BindGroupLayout,
-    mappings: HashMap<(ModId, FaceId), i32>,
+    mappings: HashMap<FaceId, i32>,
 }
 
 const MIPMAPS: Mipmap = mipmap::include_mips!("rainbow_block.png");
@@ -23,7 +23,7 @@ impl FaceTextureMap {
     pub(crate) async fn new(
         queue: &Queue,
         device: &Device,
-        images: &mut Vec<((ModId, FaceId), Vec<u8>)>,
+        images: &mut Vec<(FaceId, &'static Mipmap<'static>)>,
     ) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let mips = mipmap::include_mips!("rainbow_block.png");
         let default_image = MIPMAPS.get_all();
@@ -34,7 +34,8 @@ impl FaceTextureMap {
             let mut new_images = vec![default_image];
 
             for (index, (key, data)) in images.drain(..).enumerate() {
-                new_images.push(data);
+                println!("LAYERS: {}", data.num_layers());
+                new_images.push(data.get_all());
                 mappings.insert(key, (index + 1) as i32);
             }
 
@@ -63,7 +64,7 @@ impl FaceTextureMap {
                 mag_filter: wgpu::FilterMode::Nearest,
                 min_filter: wgpu::FilterMode::Nearest,
                 mipmap_filter: wgpu::FilterMode::Nearest,
-                lod_min_clamp: 6.0,
+                lod_min_clamp: MIPMAPS.num_layers() as f32,
                 lod_max_clamp: 0.0,
                 compare: None,
                 anisotropy_clamp: Some(NonZeroU8::new(16).unwrap()),
@@ -121,8 +122,8 @@ impl FaceTextureMap {
         })
     }
 
-    pub fn get_texture_index_for_face(&self, mod_id: ModId, face_id: FaceId) -> i32 {
-        self.mappings.get(&(mod_id, face_id)).map_or(0, |i| *i)
+    pub fn get_texture_index_for_face(&self, face_id: &FaceId) -> i32 {
+        self.mappings.get(face_id).map_or(0, |i| *i)
     }
 
     pub fn texture(&self) -> &Texture {

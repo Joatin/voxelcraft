@@ -1,15 +1,17 @@
 use crate::mesh::internal::fast_mesh::handle_face::handle_face;
-use crate::mesh::{BlockDescriptor, Face};
+use crate::mesh::{BlockDescriptor, Face, FaceDirection};
 use crate::{BlockOffset, Chunk};
 
 pub fn handle_block<
     T: Send + Sync,
     TE: Send + Sync + PartialEq + Clone,
-    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor<TE>>,
+    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>,
+    TEC: Send + Sync + Fn(&T, FaceDirection) -> TE,
     const SIZE: usize,
 >(
     chunk: &Chunk<T, SIZE>,
     describe_callback: &C,
+    texture_callback: &TEC,
     mesh: &mut Vec<Face<TE, SIZE>>,
     transparent_mesh: &mut Vec<Face<TE, SIZE>>,
     unhandled: &mut Vec<(usize, usize, usize)>,
@@ -31,6 +33,9 @@ pub fn handle_block<
                 &position,
                 position.north(),
                 Face::north,
+                texture_callback,
+                FaceDirection::North,
+                block,
             );
             handle_face(
                 chunk,
@@ -41,6 +46,9 @@ pub fn handle_block<
                 &position,
                 position.south(),
                 Face::south,
+                texture_callback,
+                FaceDirection::South,
+                block,
             );
             handle_face(
                 chunk,
@@ -51,6 +59,9 @@ pub fn handle_block<
                 &position,
                 position.west(),
                 Face::west,
+                texture_callback,
+                FaceDirection::West,
+                block,
             );
             handle_face(
                 chunk,
@@ -61,6 +72,9 @@ pub fn handle_block<
                 &position,
                 position.east(),
                 Face::east,
+                texture_callback,
+                FaceDirection::East,
+                block,
             );
             handle_face(
                 chunk,
@@ -71,6 +85,9 @@ pub fn handle_block<
                 &position,
                 position.up(),
                 Face::up,
+                texture_callback,
+                FaceDirection::Up,
+                block,
             );
             handle_face(
                 chunk,
@@ -81,6 +98,9 @@ pub fn handle_block<
                 &position,
                 position.down(),
                 Face::down,
+                texture_callback,
+                FaceDirection::Down,
+                block,
             );
         } else {
             unhandled.push((x, y, z));

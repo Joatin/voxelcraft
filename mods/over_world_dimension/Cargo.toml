@@ -1,0 +1,11 @@
+[package]
+name = "voxelcraft_over_world_dimension"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+voxelcraft_mod = { path = "../../voxelcraft_mod" }
+voxelcraft_id = { path = "../../libs/id" }
+voxelcraft_layered_world_generator = { path = "../../libs/layered_world_generator" }
+voxelcraft_standard_blocks = { path = "../standard_blocks" }
+async-trait = "0.1.52"

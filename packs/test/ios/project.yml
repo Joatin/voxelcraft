@@ -12,8 +12,8 @@ targets:
       toolPath: /bin/sh
       arguments: "build_rust_deps.sh"
       workingDirectory: "."
-  use_uikit_example:
-    sources: ios-src/
+  packs_test_example:
+    sources: src/
     type: application
     platform: iOS
     deploymentTarget: "13.0"
@@ -30,23 +30,23 @@ targets:
           isEnabled: true
     settings:
       base:
-        OTHER_LDFLAGS: ["$(inherited)", "-luse_uikit_sys_blog_post"]
+        OTHER_LDFLAGS: ["$(inherited)", "-lpacks_test"]
         ENABLE_BITCODE: NO
         CLANG_CXX_LANGUAGE_STANDARD: c++14
         CLANG_CXX_LIBRARY: libc++
       configs:
         debug:
-          HEADER_SEARCH_PATHS: ["$(inherited)", "ios-src/"]
-          LIBRARY_SEARCH_PATHS: ["$(inherited)", "./target/universal/debug"]
+          HEADER_SEARCH_PATHS: ["$(inherited)", "src/"]
+          LIBRARY_SEARCH_PATHS: ["$(inherited)", "../../../target/x86_64-apple-ios/release"]
         release:
-          HEADER_SEARCH_PATHS: ["$(inherited)", "ios-src/"]
-          LIBRARY_SEARCH_PATHS: ["$(inherited)", "./target/universal/release"]
+          HEADER_SEARCH_PATHS: ["$(inherited)", "src/"]
+          LIBRARY_SEARCH_PATHS: ["$(inherited)", "../../../target/x86_64-apple-ios/release"]
     dependencies:
       - sdk: Security.framework
       - sdk: UIKit.framework
       - target: cargo_ios
         embed: false
     info:
-      path: ios-src/Info.plist
+      path: src/Info.plist
       properties:
         UILaunchStoryboardName: LaunchScreen

@@ -1,0 +1,9 @@
+[package]
+name = "voxelcraft_id"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0", features = ["serde_derive"] }
+voxelcraft_id_macros = { path = "../id_macros" }
+bincode = { version = "^2.0.0-beta.3", features = ["serde"] }

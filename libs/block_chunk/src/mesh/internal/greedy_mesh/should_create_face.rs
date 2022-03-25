@@ -3,8 +3,7 @@ use crate::{BlockOffset, Chunk};
 
 pub fn should_create_face<
     T: Send + Sync,
-    TE: Send + Sync,
-    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor<TE>>,
+    C: Send + Sync + Fn(&T) -> Option<BlockDescriptor>,
     const SIZE: usize,
 >(
     chunk: &Chunk<T, SIZE>,

@@ -1,0 +1,14 @@
+[package]
+name = "voxelcraft_standard_blocks"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+voxelcraft_mod = { path = "../../voxelcraft_mod" }
+voxelcraft_id = { path = "../../libs/id" }
+block_chunk = { path = "../../libs/block_chunk" }
+async-trait = "0.1.52"
+mipmap = { git = "https://github.com/Joatin/mipmap" }
+
+[build-dependencies]
+mipmap = { git = "https://github.com/Joatin/mipmap" }

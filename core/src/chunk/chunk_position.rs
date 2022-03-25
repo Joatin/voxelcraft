@@ -1,14 +1,16 @@
+use crate::block::BlockPosition;
+use block_chunk::BlockOffset;
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use uuid::Uuid;
+use voxelcraft_id::DimensionId;
 
 #[derive(Default, Debug, Copy, Clone, bincode::Encode, bincode::Decode, Hash, Eq, PartialEq)]
 pub struct ChunkPosition {
     pub x: i32,
     pub y: i32,
     pub z: i32,
-    #[bincode(with_serde)]
-    pub dimension: Uuid,
+    pub dimension: DimensionId,
 }
 
 impl Display for ChunkPosition {
@@ -22,6 +24,13 @@ impl Display for ChunkPosition {
 }
 
 impl ChunkPosition {
+    pub fn base_block_position<const SIZE: usize>(&self) -> BlockPosition<SIZE> {
+        BlockPosition {
+            chunk_position: self.clone(),
+            offset: BlockOffset::default(),
+        }
+    }
+
     pub fn surrounding_chunks(&self, range: usize) -> Vec<ChunkPosition> {
         let range = range as i32;
         let start_x = self.x - range;

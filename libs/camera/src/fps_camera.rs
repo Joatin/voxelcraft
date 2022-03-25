@@ -38,17 +38,29 @@ impl FpsCamera {
         self.perspective.fovy = fovy.into()
     }
 
-    pub fn increase_yaw(&mut self, delta: f64, scale_factor: f32) {
-        self.yaw += Deg(delta as f32 * scale_factor);
+    pub fn increase_yaw(&mut self, delta: f64) -> Deg<f32> {
+        self.yaw += Deg(delta as f32);
+
+        if self.yaw.0 > 360.0 {
+            self.yaw.0 -= 360.0
+        }
+
+        if self.yaw.0 < 0.0 {
+            self.yaw.0 += 360.0
+        }
+
+        self.yaw
     }
 
-    pub fn increase_pitch(&mut self, delta: f64, scale_factor: f32) {
-        self.pitch += Deg(delta as f32 * scale_factor);
+    pub fn increase_pitch(&mut self, delta: f64) -> Deg<f32> {
+        self.pitch += Deg(delta as f32);
         if self.pitch < Deg(-89.0) {
             self.pitch = Deg(-89.0);
         } else if self.pitch > Deg(89.0) {
-            self.pitch = Deg(90.0);
+            self.pitch = Deg(89.0);
         }
+
+        self.pitch
     }
 
     pub fn set_aspect_ratio(&mut self, width: f32, height: f32) {
@@ -71,5 +83,9 @@ impl FpsCamera {
 
         OPENGL_TO_WGPU_MATRIX
             * (perspective * (Matrix4::from(euler) * Matrix4::from_translation(position)))
+    }
+
+    pub fn set_position<V: Into<Point3<f32>>>(&mut self, position: V) {
+        self.position = position.into();
     }
 }

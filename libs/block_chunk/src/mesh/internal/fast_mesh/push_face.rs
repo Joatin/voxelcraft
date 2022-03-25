@@ -3,7 +3,7 @@ use crate::mesh::{BlockDescriptor, Face};
 pub fn push_face<TE: Send + Sync, const SIZE: usize>(
     mesh: &mut Vec<Face<TE, SIZE>>,
     transparent_mesh: &mut Vec<Face<TE, SIZE>>,
-    descriptor: &BlockDescriptor<TE>,
+    descriptor: &BlockDescriptor,
     face: Face<TE, SIZE>,
 ) {
     if descriptor.is_transparent {
@@ -23,10 +23,9 @@ mod tests {
     fn it_should_push_to_transparent_list_if_transparent() {
         let mut mesh = vec![];
         let mut transparent_mesh = vec![];
-        let descriptor = BlockDescriptor::<()> {
+        let descriptor = BlockDescriptor {
             is_standard_square: true,
             is_transparent: true,
-            texture_id: (),
         };
 
         push_face(
@@ -44,10 +43,9 @@ mod tests {
     fn it_should_push_to_mesh_vec_if_not_transparent() {
         let mut mesh = vec![];
         let mut transparent_mesh = vec![];
-        let descriptor = BlockDescriptor::<()> {
+        let descriptor = BlockDescriptor {
             is_standard_square: true,
             is_transparent: false,
-            texture_id: (),
         };
 
         push_face(

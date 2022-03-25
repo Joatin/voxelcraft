@@ -12,6 +12,7 @@ harness = false
 uuid = { version = "0.8", features = ["serde", "v4"] }
 bincode = { version = "2.0.0-beta.3", features = ["serde"] }
 block_chunk = { path = "../libs/block_chunk" }
+voxelcraft_id = { path = "../libs/id" }
 
 [dev-dependencies]
 flate2 = "1.0.22"

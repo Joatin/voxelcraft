@@ -3,14 +3,19 @@ resolver = "2"
 
 
 members = [
-    "voxelcraft_client",
-    "voxelcraft_server",
+    "client",
+    "server",
     "voxelcraft_mod",
     "mods/test",
+    "mods/standard_blocks",
+    "mods/over_world_dimension",
     "packs/test",
     "core",
     "libs/block_chunk",
     "libs/wgpu_async_utils",
     "libs/face_texture_map",
-    "libs/camera"
+    "libs/camera",
+    "libs/layered_world_generator",
+    "libs/id",
+    "libs/id_macros"
 ]
